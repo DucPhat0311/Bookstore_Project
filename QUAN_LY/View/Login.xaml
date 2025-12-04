@@ -1,0 +1,113 @@
+﻿<Page x:Class="QUAN_LY.View.Login"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      d:DesignHeight="600" d:DesignWidth="800"
+      Title="Login Page">
+
+    <Grid>
+        <!-- Background Ellipses -->
+        <Ellipse Width="500" Height="500" VerticalAlignment="Bottom"  
+                 Fill="#80c0f6" Margin="50,0,0,-200" Opacity="0.6"/>
+        <Ellipse Width="300" Height="300" VerticalAlignment="Bottom"  
+                 Fill="#83c2f6" Margin="450,0,0,30" Opacity="0.3"/>
+        <Ellipse Width="400" Height="400" VerticalAlignment="Bottom"  
+                 Fill="#84c3f6" Margin="320,0,0,-120" Opacity="0.3"/>
+        <Ellipse Width="250" Height="250" VerticalAlignment="Bottom"  
+                 Fill="#81c2f6" Margin="380,0,0,-120"/>
+        <Ellipse Width="400" Height="400" VerticalAlignment="Bottom"  
+                 Fill="#87c5f6" Margin="280,0,0,-70" Opacity="0.8"/>
+
+        <!-- Login Form Container -->
+        <Border Width="380" Height="450" Background="White" 
+                CornerRadius="20" 
+                VerticalAlignment="Center" 
+                HorizontalAlignment="Center"
+                Padding="40">
+
+            <StackPanel>
+                <!-- Title -->
+                <TextBlock Text="ĐĂNG NHẬP" 
+                           FontSize="28" 
+                           FontWeight="Bold" 
+                           Foreground="#623ed0"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,30"/>
+
+                <!-- Username -->
+                <TextBlock Text="Tên đăng nhập" 
+                           Foreground="#666" 
+                           FontSize="13"
+                           Margin="0,0,0,5"/>
+
+                <TextBox x:Name="txtUsername" 
+                         Height="40" 
+                         FontSize="14"
+                         Padding="15,10"
+                         BorderThickness="1"
+                         BorderBrush="#E0E0E0">
+                    <TextBox.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </TextBox.Resources>
+                </TextBox>
+
+                <!-- Password -->
+                <TextBlock Text="Mật khẩu" 
+                           Foreground="#666" 
+                           FontSize="13"
+                           Margin="0,15,0,5"/>
+
+                <PasswordBox x:Name="txtPassword" 
+                             Height="40"
+                             FontSize="14"
+                             Padding="15,10"
+                             BorderThickness="1"
+                             BorderBrush="#E0E0E0">
+                    <PasswordBox.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </PasswordBox.Resources>
+                </PasswordBox>
+
+                <!-- Error Message -->
+                <TextBlock x:Name="txtError" 
+                           Foreground="Red" 
+                           FontSize="12"
+                           Margin="0,10,0,0"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed"/>
+
+                <!-- Login Button -->
+                <Button x:Name="BtnLogin" 
+                        Content="ĐĂNG NHẬP" 
+                        Height="45" 
+                        Margin="0,25,0,0"
+                        Background="#623ed0" 
+                        Foreground="White" 
+                        FontSize="14" 
+                        FontWeight="SemiBold" 
+                        BorderThickness="0" 
+                        Click="BtnLogin_Click"
+                        Cursor="Hand">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Demo Account Info -->
+                <StackPanel Margin="0,20,0,0" HorizontalAlignment="Center">
+                    <TextBlock Text="Tài khoản demo:" Foreground="#888" FontSize="11"/>
+                    <TextBlock Text="Username: admin" Foreground="#888" FontSize="10"/>
+                    <TextBlock Text="Password: admin123" Foreground="#888" FontSize="10"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>
