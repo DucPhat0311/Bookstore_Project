@@ -1,10 +1,11 @@
 ﻿using System.Windows.Input;
 using QUAN_LY.Utilities; // Import ViewModelBase và RelayCommand
+using QUAN_LY.Model;
 
 namespace QUAN_LY.ViewModel
 {
     // Lớp ViewModel chính cho MainWindow, quản lý việc chuyển đổi View
-    public class PageModel : ViewModelBase
+    public class PageModel : BaseViewModel
     {
         private object _currentViewModel;
         // Thuộc tính mà ContentControl trong MainWindow.xaml sẽ bind tới
@@ -24,7 +25,7 @@ namespace QUAN_LY.ViewModel
         public PageModel()
         {
             // Khởi tạo HomeVM làm View mặc định khi ứng dụng mở
-            CurrentViewModel = new HomeVM();
+            CurrentViewModel = new HomeViewModel();
 
             // Khởi tạo Command
             NavigateCommand = new RelayCommand(ExecuteNavigate);
@@ -41,19 +42,19 @@ namespace QUAN_LY.ViewModel
             switch (viewName)
             {
                 case "Home":
-                    CurrentViewModel = new HomeVM();
+                    CurrentViewModel = new HomeViewModel();
                     break;
                 case "Order":
-                    CurrentViewModel = new OrderVM();
+                    CurrentViewModel = new OrderViewModel();
                     break;
-                case "BookManagement":
-                    CurrentViewModel = new Book_ManagementVM();
+                case "Book":
+                    CurrentViewModel = new BookViewModel();
                     break;
                 case "Inventory":
-                    CurrentViewModel = new InventoryVM();
+                    CurrentViewModel = new InventoryViewModel();
                     break;
                 case "RevenueStatistics":
-                    CurrentViewModel = new Revenue_StatisticsVM();
+                    CurrentViewModel = new RevenueStatisticsViewModel();
                     break;
                 default:
                     // Có thể thêm ViewModel cho Logout (nếu cần) hoặc chỉ đơn giản là thoát
@@ -62,7 +63,5 @@ namespace QUAN_LY.ViewModel
         }
     }
 
-    // ----------- Các ViewModels Con (Đã Xóa Phần Demo Bị Trùng Lặp) -----------
-    // Các lớp HomeVM, OrderVM, v.v. đã được xóa khỏi file này để tránh lỗi CS0101.
-    // Giả định các lớp này tồn tại trong các file riêng (ví dụ: HomeVM.cs, OrderVM.cs).
+   
 }
