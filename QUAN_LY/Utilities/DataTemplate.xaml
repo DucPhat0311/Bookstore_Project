@@ -2,20 +2,20 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:QUAN_LY.ViewModel"
                     xmlns:view="clr-namespace:QUAN_LY.View">
-    <DataTemplate DataType="{x:Type vm:HomeVM}">
-        <view:Home/>
+    <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+        <view:HomeView/>
     </DataTemplate>
-    <DataTemplate DataType="{x:Type vm:Book_ManagementVM}">
-        <view:Book_Management/>
+    <DataTemplate DataType="{x:Type vm:BookViewModel}">
+        <view:BookView/>
     </DataTemplate>
-    <DataTemplate DataType="{x:Type vm:InventoryVM}">
-        <view:Inventory/>
+    <DataTemplate DataType="{x:Type vm:InventoryViewModel}">
+        <view:InventoryView/>
     </DataTemplate>
-    <DataTemplate DataType="{x:Type vm:OrderVM}">
-        <view:Order/>
+    <DataTemplate DataType="{x:Type vm:OrderViewModel}">
+        <view:OrderView/>
     </DataTemplate>
-    <DataTemplate DataType="{x:Type vm:Revenue_StatisticsVM}">
-        <view:Revenue_Statistics/>
+    <DataTemplate DataType="{x:Type vm:RevenueStatisticsViewModel}">
+        <view:RevenueStatisticsView/>
     </DataTemplate>
 
 

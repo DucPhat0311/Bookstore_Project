@@ -104,5 +104,25 @@ namespace QUAN_LY.Services
         {
             return _context.Publishers.Where(p => p.IsActive).ToList();
         }
+
+        public List<Book> GetAllBooksForManagement()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<Book> GetAllBooksForPOS()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<Book> SearchBooksForManagement(string keyword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<Book> SearchBooksForPOS(string keyword)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

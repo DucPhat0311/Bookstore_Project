@@ -8,5 +8,6 @@ namespace QUAN_LY.Interfaces
 {
     public interface IUserService
     {
+        // tự định nghĩa các hàm cần thiết cho việc quản lý người dùng
     }
 }

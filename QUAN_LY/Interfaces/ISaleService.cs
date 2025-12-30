@@ -8,5 +8,6 @@ namespace QUAN_LY.Interfaces
 {
     public interface ISaleService
     {
+        // tự định nghĩa các hàm cần thiết cho việc bán sách
     }
 }

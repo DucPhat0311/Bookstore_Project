@@ -8,5 +8,6 @@ namespace QUAN_LY.Interfaces
 {
     public interface IImportService
     {
+        // tự định nghĩa các hàm cần thiết cho việc nhập sách
     }
 }
