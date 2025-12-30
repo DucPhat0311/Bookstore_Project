@@ -1,6 +1,8 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+using QUAN_LY.Model;
+using QUAN_LY.View;
+
+using QUAN_LY.Services;
 
 namespace QUAN_LY
 {
@@ -9,6 +11,5 @@ namespace QUAN_LY
     /// </summary>
     public partial class App : Application
     {
-        // KHÔNG THAY ĐỔI GÌ
     }
 }
