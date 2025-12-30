@@ -1,14 +1,15 @@
 ﻿<Application x:Class="QUAN_LY.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             StartupUri="LoginWindow.xaml">
+             xmlns:vm="clr-namespace:QUAN_LY.ViewModel"
+             xmlns:view="clr-namespace:QUAN_LY.View"
+             StartupUri="View/MainWindowView.xaml">
     <Application.Resources>
-
         <ResourceDictionary>
-
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Styles/Page.xaml"/>
+                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
                 <ResourceDictionary Source="Utilities/DataTemplate.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
@@ -128,6 +129,7 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>
