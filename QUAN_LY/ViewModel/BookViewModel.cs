@@ -119,7 +119,7 @@ namespace QUAN_LY.ViewModel
 
         void LoadData()
         {
-            BookList = _bookService.GetAllBooks();
+            BookList = _bookService.GetAllBooksForManagement();
             PublisherList = _bookService.GetAllPublishers();
         }
     }

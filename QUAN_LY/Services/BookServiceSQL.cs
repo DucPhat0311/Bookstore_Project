@@ -46,12 +46,11 @@ namespace QUAN_LY.Services
             }
         }
 
-        public List<Book> GetAllBooks()
+        public List<Book> GetAllBooksForManagement()
         {
             return _context.Books.Where(b => !b.IsDeleted).ToList();
         }
 
-        // 4. LẤY 1 CUỐN THEO ID
         public Book GetBookById(int id)
         {
             return _context.Books.Find(id);
@@ -61,37 +60,26 @@ namespace QUAN_LY.Services
         {
             try
             {
-                // Bước 1: Tìm cuốn sách cũ trong Database bằng ID
                 var dbBook = _context.Books.Find(book.Id);
 
-                if (dbBook == null) return false; // Không tìm thấy để sửa
+                if (dbBook == null) return false; 
 
-                // Bước 2: Gán giá trị mới vào (Mapping theo đúng cột SQL bạn đưa)
 
-                // cột: title
                 dbBook.Title = book.Title;
 
-                // cột: publisher_id
                 dbBook.PublisherId = book.PublisherId;
 
-                // cột: year_published
                 dbBook.YearPublished = book.YearPublished;
 
-                // cột: edition
                 dbBook.Edition = book.Edition;
 
-                // cột: price
                 dbBook.Price = book.Price;
 
-                // cột: quantity
                 dbBook.Quantity = book.Quantity;
 
-                // cột: image_url
                 dbBook.ImageUrl = book.ImageUrl;
 
-                // Lưu ý: Không update IsDeleted ở đây vì hàm này dùng để sửa thông tin
-
-                // Bước 3: Lưu xuống DB
+                // lưu xuống database
                 return _context.SaveChanges() > 0;
             }
             catch (Exception ex)
@@ -103,11 +91,6 @@ namespace QUAN_LY.Services
         public List<Publisher> GetAllPublishers()
         {
             return _context.Publishers.Where(p => p.IsActive).ToList();
-        }
-
-        public List<Book> GetAllBooksForManagement()
-        {
-            throw new NotImplementedException();
         }
 
         public List<Book> GetAllBooksForPOS()
