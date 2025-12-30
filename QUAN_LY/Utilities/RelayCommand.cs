@@ -3,39 +3,62 @@ using System.Windows.Input;
 
 namespace QUAN_LY.Utilities
 {
-    // Lớp triển khai ICommand cho MVVM
+    // 1. DÀNH CHO TRƯỜNG HỢP KHÔNG CẦN THAM SỐ (Non-Generic)
     public class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;
         private readonly Predicate<object> _canExecute;
 
-        // Constructor cho Command luôn được thực thi
-        public RelayCommand(Action<object> execute) : this(execute, null) { }
-
-        // Constructor cho Command có điều kiện thực thi
-        public RelayCommand(Action<object> execute, Predicate<object> canExecute)
+        public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
         }
 
-        // Sự kiện xảy ra khi trạng thái CanExecute thay đổi
         public event EventHandler CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        // Kiểm tra xem Command có thể thực thi được không
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object parameter) => _canExecute == null || _canExecute(parameter);
+
+        public void Execute(object parameter) => _execute(parameter);
+    }
+
+    // 2. DÀNH CHO TRƯỜNG HỢP CÓ THAM SỐ CỤ THỂ (Generic - Cái bạn đang thiếu)
+    // Class này cho phép bạn viết: new RelayCommand<Book>(...)
+    public class RelayCommand<T> : ICommand
+    {
+        private readonly Action<T> _execute;
+        private readonly Predicate<T> _canExecute;
+
+        public RelayCommand(Action<T> execute, Predicate<T> canExecute = null)
         {
-            return _canExecute == null || _canExecute(parameter);
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
         }
 
-        // Thực thi Command
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+
+        public bool CanExecute(object parameter)
+        {
+            return _canExecute == null || _canExecute((T)parameter);
+        }
+
         public void Execute(object parameter)
         {
-            _execute(parameter);
+            _execute((T)parameter);
+        }
+
+        public void RaiseCanExecuteChanged()
+        {
+            // Ép buộc WPF kiểm tra lại trạng thái các nút ngay lập tức
+            CommandManager.InvalidateRequerySuggested();
         }
     }
 }
