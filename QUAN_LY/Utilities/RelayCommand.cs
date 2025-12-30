@@ -26,8 +26,7 @@ namespace QUAN_LY.Utilities
         public void Execute(object parameter) => _execute(parameter);
     }
 
-    // 2. DÀNH CHO TRƯỜNG HỢP CÓ THAM SỐ CỤ THỂ (Generic - Cái bạn đang thiếu)
-    // Class này cho phép bạn viết: new RelayCommand<Book>(...)
+    // 2. DÀNH CHO TRƯỜNG HỢP CÓ THAM SỐ CỤ THỂ 
     public class RelayCommand<T> : ICommand
     {
         private readonly Action<T> _execute;

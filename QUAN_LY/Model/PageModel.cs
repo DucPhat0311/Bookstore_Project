@@ -1,5 +1,5 @@
 ﻿using System.Windows.Input;
-using QUAN_LY.Utilities; // Import ViewModelBase và RelayCommand
+using QUAN_LY.Utilities; 
 using QUAN_LY.Model;
 
 namespace QUAN_LY.ViewModel
