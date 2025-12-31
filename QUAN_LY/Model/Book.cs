@@ -19,13 +19,6 @@ namespace QUAN_LY.Model
         [Column("publisher_id")]
         public int PublisherId { get; set; } 
 
-        [Column("year_published")]
-        public int YearPublished { get; set; }
-
-        [Column("edition")]
-        [StringLength(50)]
-        public string Edition { get; set; }
-
         [Column("price")]
         public decimal Price { get; set; }
 
