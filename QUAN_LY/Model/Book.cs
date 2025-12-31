@@ -16,6 +16,12 @@ namespace QUAN_LY.Model
         [StringLength(255)] 
         public string Title { get; set; }
 
+        [Column("author_id")]
+        public int AuthorId { get; set; }
+
+        [Column("subject_id")]
+        public int SubjectId { get; set; }
+
         [Column("publisher_id")]
         public int PublisherId { get; set; } 
 
