@@ -19,7 +19,10 @@ namespace QUAN_LY.Interfaces
 
         List<Publisher> GetAllPublishers();
 
-        List<Book> SearchBooksForManagement(string keyword); // hàm tìm kiếm sách cho trang quản lý sách
+        List<Author> GetAllAuthors();
+        List<Subject> GetAllSubjects();
+
+        Task<List<Book>> SearchBooksForManagementAsync(string keyword); // hàm tìm kiếm sách cho trang quản lý sách
 
         List<Book> SearchBooksForPOS(string keyword); // hàm tìm kiếm sách cho trang POS
 
