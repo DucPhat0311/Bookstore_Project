@@ -69,10 +69,6 @@ namespace QUAN_LY.Services
 
                 dbBook.PublisherId = book.PublisherId;
 
-                dbBook.YearPublished = book.YearPublished;
-
-                dbBook.Edition = book.Edition;
-
                 dbBook.Price = book.Price;
 
                 dbBook.Quantity = book.Quantity;
