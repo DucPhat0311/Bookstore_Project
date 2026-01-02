@@ -19,7 +19,7 @@ namespace QUAN_LY.ViewModel
         // Thuộc tính này trả về lỗi của toàn bộ object
         public string Error => null;
 
-        // Thuộc tính này trả về lỗi của từng trường (Cực quan trọng)
+        // Thuộc tính này trả về lỗi của từng trường 
         public string this[string columnName]
         {
             get
@@ -39,7 +39,7 @@ namespace QUAN_LY.ViewModel
                         return validationResults.First().ErrorMessage;
                     }
                 }
-                return null; // Không có lỗi
+                return null; 
             }
         }
 
