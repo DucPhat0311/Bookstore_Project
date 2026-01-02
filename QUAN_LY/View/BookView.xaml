@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:QUAN_LY.View"
+             xmlns:vm="clr-namespace:QUAN_LY.ViewModel"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1100"
@@ -13,9 +14,13 @@
              TextOptions.TextFormattingMode="Ideal"
              TextOptions.TextRenderingMode="Auto"
              Background="{DynamicResource MaterialDesignPaper}"
-             FontFamily="{DynamicResource MaterialDesignFont}"
-            >
+             FontFamily="{DynamicResource MaterialDesignFont}">
 
+    <UserControl.DataContext>
+        <vm:BookViewModel />
+    </UserControl.DataContext>
+
+    
     <Grid Margin="16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="7*" />
@@ -26,37 +31,101 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <materialDesign:Card Grid.Row="0" Margin="4" Padding="8" UniformCornerRadius="20" materialDesign:ElevationAssist.Elevation="Dp2">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <StackPanel>
 
-                    <materialDesign:PackIcon Kind="Magnify" VerticalAlignment="Center" Width="24" Height="24" Margin="12,0" Foreground="Gray"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="180"/>
+                        </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="1"
-                             Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
-                             materialDesign:HintAssist.Hint="Tìm kiếm theo tên sách..."
-                             materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
-                             BorderThickness="0"
-                             VerticalAlignment="Center" FontSize="15" Margin="5,0"/>
+                        <materialDesign:PackIcon Kind="Magnify" VerticalAlignment="Center" Width="24" Height="24" Margin="12,0" Foreground="Gray"/>
 
-                    <Button Grid.Column="2" Command="{Binding SearchCommand}"
-                            Style="{DynamicResource MaterialDesignFloatingActionMiniButton}"
-                            Background="{DynamicResource PrimaryHueMidBrush}"
-                            BorderBrush="{DynamicResource PrimaryHueMidBrush}"
-                            Width="36" Height="36" Margin="4"
-                            ToolTip="Tìm kiếm">
-                        <materialDesign:PackIcon Kind="ArrowRight"/>
-                    </Button>
-                </Grid>
+                        <TextBox Grid.Column="1"
+                     Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Tìm kiếm theo tên sách..."
+                     materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                     BorderThickness="0"
+                     VerticalAlignment="Center" FontSize="15" Margin="5,0">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SearchCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+
+                        <Button Grid.Column="2" Command="{Binding SearchCommand}"
+                    Style="{DynamicResource MaterialDesignFloatingActionMiniButton}"
+                    Background="{DynamicResource PrimaryHueMidBrush}"
+                    BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                    Width="36" Height="36" Margin="4"
+                    ToolTip="Tìm kiếm">
+                            <materialDesign:PackIcon Kind="ArrowRight"/>
+                        </Button>
+
+                        <ComboBox Grid.Column="3"
+                      ItemsSource="{Binding SortOptions}"
+                      SelectedItem="{Binding SelectedSortOption}"
+                      materialDesign:HintAssist.Hint="Sắp xếp"
+                      Style="{DynamicResource MaterialDesignOutlinedComboBox}"
+                      Margin="10,0"
+                      VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Separator Background="#EEE" Margin="0,10"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox Grid.Column="0"
+                      ItemsSource="{Binding SubjectList}"
+                      SelectedItem="{Binding SelectedFilterSubject}"
+                      DisplayMemberPath="Name"
+                      materialDesign:HintAssist.Hint="Lọc theo Thể loại"
+                      Style="{DynamicResource MaterialDesignOutlinedComboBox}"
+                      Margin="0,0,8,0"/>
+
+                        <ComboBox Grid.Column="1"
+                      ItemsSource="{Binding AuthorList}"
+                      SelectedItem="{Binding SelectedFilterAuthor}"
+                      DisplayMemberPath="Name"
+                      materialDesign:HintAssist.Hint="Lọc theo Tác giả"
+                      Style="{DynamicResource MaterialDesignOutlinedComboBox}"
+                      Margin="0,0,8,0"/>
+
+                        <ComboBox Grid.Column="2"
+                      ItemsSource="{Binding PublisherList}"
+                      SelectedItem="{Binding SelectedFilterPublisher}"
+                      DisplayMemberPath="Name"
+                      materialDesign:HintAssist.Hint="Lọc theo NXB"
+                      Style="{DynamicResource MaterialDesignOutlinedComboBox}"
+                      Margin="0,0,8,0"/>
+
+                        <Button Grid.Column="3"
+                    Command="{Binding ClearFilterCommand}"
+                    Style="{DynamicResource MaterialDesignOutlinedButton}"
+                    BorderBrush="OrangeRed" Foreground="OrangeRed"
+                    ToolTip="Xóa hết điều kiện lọc">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FilterOff" Margin="0,0,5,0"/>
+                                <TextBlock Text="Xóa lọc"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                </StackPanel>
             </materialDesign:Card>
 
-            <ListBox Grid.Row="1" ItemsSource="{Binding BookList}" 
+            <ListBox Grid.Row="1" ItemsSource="{Binding DisplayItems}" 
                      SelectedItem="{Binding SelectedBook, Mode=TwoWay}"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      BorderThickness="0" Background="Transparent"
@@ -70,12 +139,12 @@
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <materialDesign:Card Height="280" Margin="10" UniformCornerRadius="12" 
+                        <materialDesign:Card Height="320" Margin="10" UniformCornerRadius="12" 
                                              materialDesign:ElevationAssist.Elevation="Dp3"
                                              Cursor="Hand">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="180"/>
+                                    <RowDefinition Height="220"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
@@ -83,15 +152,11 @@
 
                                 <StackPanel Grid.Row="1" Margin="12,8">
                                     <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="15" 
-                                               TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}" Height="22"/>
+                                           TextWrapping="Wrap"  TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}" Height="62"/>
 
                                     <Separator Margin="0,4" Background="#EEE"/>
 
                                     <DockPanel LastChildFill="False">
-                                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                            <materialDesign:PackIcon Kind="AccountEdit" Width="14" Height="14" VerticalAlignment="Center" Foreground="Gray"/>
-                                            <TextBlock Text="{Binding Author}" FontSize="12" Foreground="Gray" Margin="4,0,0,0" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
-                                        </StackPanel>
 
                                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                                             <materialDesign:PackIcon Kind="Warehouse" Width="14" Height="14" VerticalAlignment="Center" Foreground="Gray"/>
@@ -104,7 +169,26 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-        </Grid>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10">
+                <Button Command="{Binding PreviousPageCommand}" 
+                        Style="{DynamicResource MaterialDesignFloatingActionMiniButton}"
+                        ToolTip="Trang trước"
+                        Background="Gray" BorderBrush="Gray" Margin="10,0">
+                    <materialDesign:PackIcon Kind="ChevronLeft" Width="24" Height="24"/>
+                </Button>
+
+                <TextBlock Text="{Binding CurrentPage, StringFormat='Trang {0}'}" 
+                           VerticalAlignment="Center" FontWeight="Bold" FontSize="16" Margin="15,0"/>
+
+                <Button Command="{Binding NextPageCommand}" 
+                        Style="{DynamicResource MaterialDesignFloatingActionMiniButton}"
+                        ToolTip="Trang sau"
+                        Background="Gray" BorderBrush="Gray" Margin="10,0">
+                    <materialDesign:PackIcon Kind="ChevronRight" Width="24" Height="24"/>
+                </Button>
+            </StackPanel>
+    </Grid>
 
         <materialDesign:Card Grid.Column="1" Background="{DynamicResource MaterialDesignPaper}" 
                              UniformCornerRadius="12" 
@@ -131,7 +215,7 @@
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
                     <StackPanel>
                         <TextBlock Text="Tên sách" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
-                        <TextBox Text="{Binding SelectedBook.Title, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox Text="{Binding SelectedBook.Title, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                          materialDesign:HintAssist.Hint="Nhập tên sách đầy đủ"
                          Style="{DynamicResource MaterialDesignOutlinedTextBox}"
                          Margin="0,0,0,16" FontSize="14"/>
@@ -139,30 +223,53 @@
                         <Grid Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="15"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,0,0">
+                                <TextBlock Text="Tác giả" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding AuthorList}"
+                                DisplayMemberPath="Name" 
+                                SelectedValuePath="Id"
+                                SelectedValue="{Binding SelectedBook.AuthorId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"     
+                                materialDesign:HintAssist.Hint="Chọn Tác giả"
+                                Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
+                            </StackPanel>
+                        </Grid>
+
+
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Tác giả" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
-                                <TextBox Text="{Binding SelectedBook.Author, UpdateSourceTrigger=PropertyChanged}"
-                                 materialDesign:HintAssist.Hint="Tên tác giả"
-                                 Style="{DynamicResource MaterialDesignOutlinedTextBox}"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Nhà xuất bản" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
-                                <ComboBox ItemsSource="{Binding PublisherList}"
-                                          DisplayMemberPath="Name" 
-                                          SelectedValuePath="Id"
-                                          SelectedValue="{Binding SelectedBook.PublisherId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  
-                                  materialDesign:HintAssist.Hint="Chọn NXB"
-                                  Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
+                            <StackPanel Grid.Column="0" Margin="0,0,0,0">
+                                <TextBlock Text="Thể loại" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding SubjectList}"
+                                DisplayMemberPath="Name" 
+                                SelectedValuePath="Id"
+                                SelectedValue="{Binding SelectedBook.SubjectId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                materialDesign:HintAssist.Hint="Chọn Thể loại"
+                                Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
                             </StackPanel>
                         </Grid>
 
                         <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,0,0">
+                                <TextBlock Text="Nhà xuất bản" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding PublisherList}"
+                                DisplayMemberPath="Name" 
+                                SelectedValuePath="Id"
+                                SelectedValue="{Binding SelectedBook.PublisherId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                materialDesign:HintAssist.Hint="Chọn NXB"
+                                Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1.5*"/>
                                 <ColumnDefinition Width="15"/>
@@ -171,7 +278,7 @@
 
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Giá bán (VNĐ)" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
-                                <TextBox Text="{Binding SelectedBook.Price, StringFormat=N0}"
+                                <TextBox Text="{Binding SelectedBook.Price, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                                  materialDesign:HintAssist.Hint="0"
                                  Style="{DynamicResource MaterialDesignOutlinedTextBox}"/>
                             </StackPanel>
@@ -184,15 +291,14 @@
                                  Background="#F0F0F0"
                                  materialDesign:HintAssist.Hint="0"
                                  ToolTip="Số lượng được quản lý tự động"
-                                 Style="{DynamicResource MaterialDesignOutlinedTextBox}"/>
+                                 Style="{DynamicResource MaterialDesignOutlinedTextBox}"
+                                         Margin="0,0,0,5"   />
                             </StackPanel>
                         </Grid>
-
-                        <TextBlock Text="Đường dẫn ảnh bìa" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
-                        <TextBox Text="{Binding SelectedBook.ImageUrl}"
-                         materialDesign:HintAssist.Hint="Images/example.jpg"
-                         Style="{DynamicResource MaterialDesignOutlinedTextBox}"
-                         Margin="0,0,0,10"/>
+                        <Button Command="{Binding UploadImageCommand}"
+                                Content="CHỌN ẢNH BÌA" 
+                                Style="{DynamicResource MaterialDesignOutlinedButton}"
+                                Margin="0,10"/>
                     </StackPanel>
                 </ScrollViewer>
 
@@ -226,7 +332,7 @@
                     </Button>
 
                     <Button Command="{Binding ClearCommand}" Style="{DynamicResource MaterialDesignOutlinedButton}"
-                            BorderBrush="Gray" Foreground="Gray" Margin="5"
+                            BorderBrush="Yellow" Background="Yellow" Margin="5"
                             ToolTip="Làm mới form">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Eraser" VerticalAlignment="Center" Margin="0,0,5,0"/>
