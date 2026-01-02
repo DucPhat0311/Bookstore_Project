@@ -8,6 +8,7 @@ namespace QUAN_LY.Utilities
     {
         private readonly Action<object> _execute;
         private readonly Predicate<object> _canExecute;
+        public event EventHandler CanExecuteChanges;
 
         public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
         {
@@ -24,6 +25,11 @@ namespace QUAN_LY.Utilities
         public bool CanExecute(object parameter) => _canExecute == null || _canExecute(parameter);
 
         public void Execute(object parameter) => _execute(parameter);
+
+        public void RaiseCanExecuteChanged()
+        {
+            CanExecuteChanges?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     // 2. DÀNH CHO TRƯỜNG HỢP CÓ THAM SỐ CỤ THỂ 
