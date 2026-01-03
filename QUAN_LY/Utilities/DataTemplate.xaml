@@ -17,6 +17,9 @@
     <DataTemplate DataType="{x:Type vm:RevenueStatisticsViewModel}">
         <view:RevenueStatisticsView/>
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:AdminViewModel}">
+        <view:AdminView/>
+    </DataTemplate>
 
 
 
