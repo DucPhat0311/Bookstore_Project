@@ -10,7 +10,6 @@
         Title="MainWindow" Height="730" Width="1320" WindowStartupLocation="CenterScreen" WindowStyle="None"
         AllowsTransparency="True" Background="Transparent">
 
-    <!-- Gán DataContext cho Window, sử dụng PageModel là ViewModel chính -->
     <Window.DataContext>
         <vm:PageModel/>
     </Window.DataContext>
@@ -21,7 +20,7 @@
 
     <Border Background="#eff2f7" CornerRadius="30" MouseDown="Border_MouseDown" MouseLeftButtonDown="Border_MouseLeftButtonDown">
         <Grid>
-            <Grid.ColumnDefinitions >
+            <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -37,7 +36,7 @@
                     <Icon:PackIconMaterial Kind="Menu" Width="15" Height="15"/>
                 </Button>
 
-                <Border Grid.Row=" 1" Background="#623ed0" CornerRadius="0 50 0 30">
+                <Border Grid.Row="1" Background="#623ed0" CornerRadius="0 50 0 30">
                     <DockPanel>
                         <Border Width="80" Height="80" Padding="3" Background="White" CornerRadius="100"
                                 DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="20 -30 0 0">
@@ -46,14 +45,15 @@
                                     <ImageBrush ImageSource="/Images/LOGO.jpg"/>
                                 </Ellipse.Fill>
                             </Ellipse>
-
                         </Border>
+
                         <TextBlock Text="ADVT" Foreground="White" FontSize="22" FontWeight="SemiBold"
-                                        DockPanel.Dock="Top" TextAlignment="Center" Margin="5 25 0 10"/>
+                                   DockPanel.Dock="Top" TextAlignment="Center" Margin="5 25 0 10"/>
+
                         <Separator Margin="25" DockPanel.Dock="Top" Height="0.8" Background="#7e5fdc"/>
 
                         <StackPanel DockPanel.Dock="Top">
-                            <!-- Nút Home: Gắn Command -->
+                            <!-- Nút Home -->
                             <Button Style="{StaticResource menuButton}"
                                     Command="{Binding NavigateCommand}"
                                     CommandParameter="Home">
@@ -63,7 +63,7 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- Nút Order: Gắn Command -->
+                            <!-- Nút Order (Bán hàng) -->
                             <Button Style="{StaticResource menuButton}"
                                     Command="{Binding NavigateCommand}"
                                     CommandParameter="Order">
@@ -73,7 +73,7 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- Nút Book Management: Gắn Command -->
+                            <!-- Nút Book (Quản lý sách) -->
                             <Button Style="{StaticResource menuButton}"
                                     Command="{Binding NavigateCommand}"
                                     CommandParameter="Book">
@@ -83,17 +83,17 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- Nút Inventory: Gắn Command -->
+                            <!-- Nút Inventory (Tồn kho) -->
                             <Button Style="{StaticResource menuButton}"
                                     Command="{Binding NavigateCommand}"
                                     CommandParameter="Inventory">
                                 <StackPanel Orientation="Horizontal">
-                                    <Icon:PackIconMaterial Kind="library" Style="{StaticResource menuButtonIcon}"/>
+                                    <Icon:PackIconMaterial Kind="Library" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Inventory"/>
                                 </StackPanel>
                             </Button>
 
-                            <!-- Nút Revenue Statistics: Gắn Command -->
+                            <!-- Nút Revenue Statistics (Doanh thu) -->
                             <Button Style="{StaticResource menuButton}"
                                     Command="{Binding NavigateCommand}"
                                     CommandParameter="RevenueStatistics">
@@ -103,28 +103,35 @@
                                 </StackPanel>
                             </Button>
 
+                            <!-- NÚT QUẢN LÝ NHÂN VIÊN  -->
+                            <Button Style="{StaticResource menuButton}"
+                                    Command="{Binding NavigateCommand}"
+                                    CommandParameter="Admin">
+                                <StackPanel Orientation="Horizontal">
+                                    <Icon:PackIconMaterial Kind="AccountGroup" Style="{StaticResource menuButtonIcon}"/>
+                                    <TextBlock Text="Quản lý nhân viên"/>
+                                </StackPanel>
+                            </Button>
+                       
+
                         </StackPanel>
-                        
-                        <Button Style="{StaticResource menuButton}" 
-                          VerticalAlignment="Bottom" 
-                          DockPanel.Dock="Bottom" 
-                          Margin="15,0"
-                          Click="LogoutButton_Click">
+
+                        <!-- Nút Logout ở dưới cùng -->
+                        <Button Style="{StaticResource menuButton}"
+                                VerticalAlignment="Bottom"
+                                DockPanel.Dock="Bottom"
+                                Margin="15,0"
+                                Click="LogoutButton_Click">
                             <StackPanel Orientation="Horizontal">
                                 <Icon:PackIconMaterial Kind="Logout" Style="{StaticResource menuButtonIcon}"/>
                                 <TextBlock Text="Logout"/>
                             </StackPanel>
                         </Button>
-
-
                     </DockPanel>
-
                 </Border>
-
-
             </Grid>
 
-            <!-- Cột 1: Khu vực hiển thị nội dung chính -->
+            <!-- Cột 1: Nội dung chính -->
             <Grid Grid.Column="1" Margin="30 20 20 20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -136,8 +143,7 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
-
-                <!-- Hàng 0: Thanh Search và Icons (Giữ nguyên) -->
+                <!-- Thanh tìm kiếm và các icon trên cùng -->
                 <Grid Width="300" HorizontalAlignment="Left" Grid.Row="0">
                     <TextBlock Margin="20 0" VerticalAlignment="Center" Foreground="#b0b9c6" IsHitTestVisible="False"
                                Panel.ZIndex="1" Text="Search here ..."
@@ -147,27 +153,19 @@
                                            Margin="0 0 15 0" Foreground="#b0b9c6" HorizontalAlignment="Right"/>
                 </Grid>
 
-
                 <Button Style="{StaticResource topButton}" Margin="0 0 20 0" Background="#dcdcdc" HorizontalAlignment="Right" Grid.Row="0">
                     <Icon:PackIconMaterial Kind="Cog"/>
                 </Button>
+
                 <Button Style="{StaticResource topButton}" Margin="0 0 55 0" HorizontalAlignment="Right" Grid.Row="0">
                     <Icon:PackIconMaterial Kind="Bell"/>
                 </Button>
 
-                <!-- Hàng 1: Tiêu đề và nút Add Book (Giữ nguyên) -->
-                <!-- Tôi sẽ ẩn phần này vì ContentControl sẽ thay thế toàn bộ nội dung hiển thị View -->
-                <!-- Thay thế nội dung tĩnh bằng ContentControl để hiển thị View động -->
-
+                <!-- Khu vực hiển thị View động -->
                 <ContentControl Grid.Row="1" Grid.RowSpan="6"
                                 Content="{Binding CurrentViewModel}"
                                 Margin="0 20 0 0" />
-                <!-- ContentControl sẽ trải dài từ Row 1 đến Row cuối cùng -->
-
             </Grid>
-
         </Grid>
-
     </Border>
-
 </Window>
