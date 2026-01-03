@@ -3,19 +3,54 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:utils="clr-namespace:QUAN_LY.Utilities">
+             xmlns:utils="clr-namespace:QUAN_LY.Utilities"
+             xmlns:converters="clr-namespace:QUAN_LY.Utilities"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors">
 
     <UserControl.Resources>
-        <!-- 3 Converter cần thiết -->
-        <utils:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-        <utils:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
-        <utils:NotSuperAdminConverter x:Key="NotSuperAdminConverter"/>
+        <!-- Converters -->
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
+        <converters:NotSuperAdminConverter x:Key="NotSuperAdminConverter"/>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
 
-        <!-- Danh sách vai trò (không có Super Admin) -->
+        <!-- Validation Error Template -->
+        <ControlTemplate x:Key="ValidationErrorTemplate">
+            <DockPanel>
+                <Border BorderBrush="#F44336" BorderThickness="1" CornerRadius="3">
+                    <AdornedElementPlaceholder/>
+                </Border>
+                <TextBlock Text="{Binding [0].ErrorContent}" 
+                           Foreground="#F44336" 
+                           FontSize="12"
+                           Margin="5,2,0,0"
+                           Visibility="{Binding Path=AdornedElement.(Validation.HasError), 
+                                   Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </DockPanel>
+        </ControlTemplate>
+
+        <!-- Danh sách vai trò -->
         <x:Array x:Key="RoleItems" Type="sys:String" xmlns:sys="clr-namespace:System;assembly=mscorlib">
             <sys:String>Manager</sys:String>
             <sys:String>Sale Staff</sys:String>
         </x:Array>
+
+        <!-- Style cho TextBox có validation -->
+        <Style x:Key="ValidatedTextBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ValidationErrorTemplate}"/>
+            <Setter Property="materialDesign:HintAssist.FloatingScale" Value="0.8"/>
+            <Setter Property="materialDesign:HintAssist.FloatingOffset" Value="0,-20"/>
+            <Setter Property="Margin" Value="0,0,10,15"/>
+            <Setter Property="Padding" Value="10"/>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="BorderBrush" Value="#F44336"/>
+                    <Setter Property="Foreground" Value="#F44336"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </UserControl.Resources>
 
     <Grid Margin="20">
@@ -28,8 +63,10 @@
 
         <!-- Tiêu đề + Nút Thêm -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-            <materialDesign:PackIcon Kind="AccountGroup" Width="35" Height="35" VerticalAlignment="Center" Foreground="#623ed0"/>
-            <TextBlock Text="Quản lý nhân viên" FontSize="26" FontWeight="Bold" VerticalAlignment="Center" Margin="15,0"/>
+            <materialDesign:PackIcon Kind="AccountGroup" Width="35" Height="35" 
+                                     VerticalAlignment="Center" Foreground="#623ed0"/>
+            <TextBlock Text="Quản lý nhân viên" FontSize="26" FontWeight="Bold" 
+                       VerticalAlignment="Center" Margin="15,0"/>
 
             <Button Content="Thêm nhân viên mới"
                     Command="{Binding AddCommand}"
@@ -37,16 +74,64 @@
                     Padding="15,8"
                     Background="#623ed0"
                     Foreground="White"
-                    BorderBrush="#623ed0"/>
+                    BorderBrush="#623ed0"
+                    Margin="20,0,0,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </StackPanel>
 
-        <!-- Tìm kiếm -->
-        <TextBox Grid.Row="1"
-                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                 materialDesign:HintAssist.Hint="Tìm kiếm theo tên hoặc tài khoản"
-                 Height="45"
-                 FontSize="14"
-                 Margin="0,0,0,20"/>
+        <!-- Status bar và tìm kiếm -->
+		<Grid Grid.Row="1" Margin="0,0,0,20">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="Auto"/>
+			</Grid.ColumnDefinitions>
+
+			<!-- Tìm kiếm -->
+			<TextBox Grid.Column="0"
+					 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+					 materialDesign:HintAssist.Hint="Tìm kiếm theo tên hoặc tài khoản"
+					 Height="45"
+					 FontSize="14"
+					 IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}">
+				<TextBox.Style>
+					<Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+						<Setter Property="Padding" Value="15,10"/>
+					</Style>
+				</TextBox.Style>
+			</TextBox>
+
+			<!-- Nút Refresh  -->
+			<Button Grid.Column="1"
+					Command="{Binding RefreshCommand}"
+					ToolTip="Làm mới"
+					Margin="10,0,0,0"
+					Width="45"
+					Height="45"
+					Style="{StaticResource MaterialDesignFloatingActionButton}">
+				<materialDesign:PackIcon Kind="Refresh" Width="20" Height="20"/>
+			</Button>
+		</Grid>
+
+        <!-- Progress bar -->
+        <ProgressBar Grid.Row="1" Height="3" Margin="0,50,0,0"
+                     IsIndeterminate="{Binding IsLoading}"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+        <!-- Status message -->
+        <TextBlock Grid.Row="1" Margin="0,55,0,0"
+                   Text="{Binding StatusMessage}"
+                   Foreground="#666"
+                   FontSize="12"
+                   FontStyle="Italic"/>
 
         <!-- Danh sách nhân viên -->
         <DataGrid Grid.Row="2"
@@ -58,14 +143,49 @@
                   RowHeight="50"
                   Margin="0,0,0,20"
                   GridLinesVisibility="Horizontal"
-                  HeadersVisibility="Column">
+                  HeadersVisibility="Column"
+                  IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                  SelectionMode="Single">
+
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Họ và tên" Binding="{Binding Name}" Width="2*"/>
                 <DataGridTextColumn Header="Tài khoản" Binding="{Binding Username}" Width="*"/>
                 <DataGridTextColumn Header="Vai trò" Binding="{Binding RoleDisplay}" Width="*"/>
                 <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusDisplay}" Width="*"/>
             </DataGrid.Columns>
+
+            <DataGrid.Style>
+                <Style TargetType="DataGrid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding AdminList.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Style>
         </DataGrid>
+
+        <!-- Thông báo không có dữ liệu -->
+        <Border Grid.Row="2" 
+                Visibility="{Binding AdminList.Count, Converter={StaticResource ZeroToVisibilityConverter}}"
+                Background="#F8F9FA" 
+                CornerRadius="10"
+                Margin="0,0,0,20"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Padding="30">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <materialDesign:PackIcon Kind="AccountSearch" Width="50" Height="50" Foreground="#CCC"/>
+                <TextBlock Text="Không tìm thấy nhân viên" 
+                           Foreground="#999" 
+                           FontSize="16"
+                           Margin="0,10,0,0"/>
+                <TextBlock Text="{Binding SearchText, StringFormat='Với từ khóa: {0}'}"
+                           Foreground="#AAA"
+                           FontSize="12"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
 
         <!-- Form chỉnh sửa / thêm mới -->
         <Border Grid.Row="3"
@@ -76,65 +196,155 @@
                 BorderThickness="1"
                 Visibility="{Binding SelectedAdmin, Converter={StaticResource NullToVisibilityConverter}}">
 
-            <StackPanel>
-                <TextBlock Text="{Binding SelectedAdmin.AdminId, StringFormat='{}{0} - {0 == 0:Thêm nhân viên mới:Cập nhật thông tin}'}"
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <TextBlock Grid.Row="0"
+                           Text="{Binding SelectedAdmin.AdminId, 
+                                  StringFormat='{}{0} - {0 == 0 ? Thêm nhân viên mới : Cập nhật thông tin}'}"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Margin="0,0,0,15"
                            Foreground="#623ed0"/>
 
-                <Grid Margin="0,10,0,20">
+                <!-- Validation summary -->
+                <Border Grid.Row="1"
+                        Background="#FFF2F2"
+                        BorderBrush="#F44336"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        Padding="10"
+                        Margin="0,0,0,15"
+                        Visibility="{Binding SelectedAdmin.HasErrors, 
+                                 Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="{Binding SelectedAdmin.Error}"
+                               Foreground="#F44336"
+                               FontSize="13"
+                               TextWrapping="Wrap"/>
+                </Border>
+
+                <!-- Form fields -->
+                <Grid Grid.Row="2" Margin="0,10,0,20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Họ tên -->
                     <TextBox Grid.Column="0"
-                             Text="{Binding SelectedAdmin.Name, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
-                             materialDesign:HintAssist.Hint="Họ và tên"
-                             Margin="0,0,10,0"/>
+                             Text="{Binding SelectedAdmin.Name, 
+                                    ValidatesOnDataErrors=True, 
+                                    UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Họ và tên *"
+                             Style="{StaticResource ValidatedTextBox}"/>
 
                     <!-- Tài khoản -->
-                    <TextBox Grid.Column="1"
-                             Text="{Binding SelectedAdmin.Username, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
-                             materialDesign:HintAssist.Hint="Tài khoản đăng nhập"
-                             Margin="0,0,10,0"/>
+                    <TextBox Grid.Column="2"
+                             Text="{Binding SelectedAdmin.Username, 
+                                    ValidatesOnDataErrors=True, 
+                                    UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Tài khoản đăng nhập *"
+                             Style="{StaticResource ValidatedTextBox}"/>
 
-                    <!-- Mật khẩu - chỉ hiện khi thêm mới -->
-                    <PasswordBox Grid.Column="2"
-             x:Name="PasswordBoxNew"
-             materialDesign:HintAssist.Hint="Mật khẩu (chỉ nhập khi thêm mới)"
-             Visibility="{Binding SelectedAdmin.AdminId, Converter={StaticResource ZeroToVisibilityConverter}}"
-             Margin="0,0,10,0"
-             PasswordChanged="PasswordBox_PasswordChanged"/>
+                    <!-- Mật khẩu -->
+                    <PasswordBox Grid.Column="4"
+             x:Name="PasswordBoxInput"
+             materialDesign:HintAssist.Hint="..."
+             Margin="0,0,10,15"
+             Padding="10"
+             PasswordChanged="PasswordBox_PasswordChanged">
+                        <PasswordBox.Style>
+                            <Style TargetType="PasswordBox" BasedOn="{StaticResource {x:Type PasswordBox}}">
+                                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ValidationErrorTemplate}"/>
+                                <Setter Property="materialDesign:HintAssist.FloatingScale" Value="0.8"/>
+                                <Setter Property="materialDesign:HintAssist.FloatingOffset" Value="0,-20"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedAdmin.AdminId}" Value="0">
+                                        <Setter Property="materialDesign:ValidationAssist.UsePopup" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </PasswordBox.Style>
+                        <behaviors:Interaction.Behaviors>
+                            <utils:PasswordBoxBehavior Password="{Binding PasswordInput, Mode=TwoWay}"/>
+                        </behaviors:Interaction.Behaviors>
+                    </PasswordBox>
 
                     <!-- Vai trò -->
-                    <ComboBox Grid.Column="3"
+                    <ComboBox Grid.Column="6"
                               SelectedItem="{Binding SelectedAdmin.Role}"
                               ItemsSource="{StaticResource RoleItems}"
-                              materialDesign:HintAssist.Hint="Vai trò"/>
+                              materialDesign:HintAssist.Hint="Vai trò *"
+                              Margin="0,0,0,15"
+                              Padding="10"
+                              Height="45">
+                        <ComboBox.Style>
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                                <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ValidationErrorTemplate}"/>
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
                 </Grid>
 
-                <!-- Nút Lưu / Xóa -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <!-- Action buttons -->
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Hủy"
+                            Command="{Binding CancelCommand}"
+                            Width="100"
+                            Margin="0,0,10,0"
+                            Background="#9E9E9E"
+                            Foreground="White"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"/>
+
                     <Button Content="Lưu thay đổi"
                             Command="{Binding EditCommand}"
                             Width="120"
                             Margin="0,0,10,0"
                             Background="#4CAF50"
-                            Foreground="White"/>
+                            Foreground="White"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedAdmin.HasErrors}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                        <Setter Property="ToolTip" Value="Vui lòng sửa các lỗi trước khi lưu"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
 
                     <Button Content="Xóa nhân viên"
                             Command="{Binding DeleteCommand}"
                             Width="120"
                             Background="#F44336"
                             Foreground="White"
-                            IsEnabled="{Binding SelectedAdmin.Role, Converter={StaticResource NotSuperAdminConverter}}"/>
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedAdmin.Role}" Value="Super Admin">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                        <Setter Property="ToolTip" Value="Không thể xóa Super Admin"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
-            </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>
