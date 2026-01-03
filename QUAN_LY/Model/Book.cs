@@ -59,6 +59,7 @@ namespace QUAN_LY.Model
             set { _price = value; OnPropertyChanged(); }
         }
 
+
         [Column("quantity")]
         public int Quantity { get; set; }
 

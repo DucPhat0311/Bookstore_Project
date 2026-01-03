@@ -3,15 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QUAN_LY.Model
 {
+    [Table("orderitem")]
     public class OrderItem
     {
-        public int Id { get; set; } // order_item_id
+        [Key]
+        [Column("order_item_id")] // Hoặc 'id', tùy DB của bạn
+        public int Id { get; set; }
+
+        [Column("order_id")]
         public int OrderId { get; set; }
+
+        [Column("book_id")]
         public int BookId { get; set; }
+
+        [Column("quantity")]
         public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; } // Giá tại thời điểm bán
+
+        [Column("price")]
+        public decimal Price { get; set; }
     }
+
 }
