@@ -56,6 +56,9 @@ namespace QUAN_LY.ViewModel
                 case "RevenueStatistics":
                     CurrentViewModel = new RevenueStatisticsViewModel();
                     break;
+                case "Admin":
+                    CurrentViewModel = new AdminViewModel();
+                    break;
                 default:
                     // Có thể thêm ViewModel cho Logout (nếu cần) hoặc chỉ đơn giản là thoát
                     break;
