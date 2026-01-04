@@ -1,4 +1,4 @@
-﻿// QUAN_LY/Services/AdminServiceSQL.cs
+﻿
 using Microsoft.EntityFrameworkCore;
 using QUAN_LY.Interfaces;
 using QUAN_LY.Model;
