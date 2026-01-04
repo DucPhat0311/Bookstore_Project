@@ -1,0 +1,368 @@
+﻿
+<UserControl x:Class="QUAN_LY.View.AdminView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:utils="clr-namespace:QUAN_LY.Utilities"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:local="clr-namespace:QUAN_LY">
+
+    <UserControl.Resources>
+        <!-- Converters -->
+        <utils:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <utils:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <utils:NotSuperAdminConverter x:Key="NotSuperAdminConverter"/>
+        <utils:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <utils:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
+
+        <!-- Danh sách vai trò -->
+        <x:Array x:Key="RoleItems" Type="sys:String" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+            <sys:String>Manager</sys:String>
+            <sys:String>Sale Staff</sys:String>
+        </x:Array>
+
+        <!-- Style cho TextBox -->
+        <Style x:Key="FormTextBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="materialDesign:HintAssist.FloatingScale" Value="0.8"/>
+            <Setter Property="materialDesign:HintAssist.FloatingOffset" Value="0,-20"/>
+            <Setter Property="Margin" Value="0,0,10,15"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Tiêu đề -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <materialDesign:PackIcon Kind="AccountGroup" Width="35" Height="35" 
+                             VerticalAlignment="Center" Foreground="#623ed0"/>
+            <TextBlock Text="Quản lý nhân viên" FontSize="26" FontWeight="Bold" 
+               VerticalAlignment="Center" Margin="15,0"/>
+
+            <!-- Nút Xóa nhân viên (HIỆN KHI CHỌN NHÂN VIÊN) -->
+            <Button Content="Xóa nhân viên"
+            Command="{Binding DeleteCommand}"
+            Padding="15,8"
+            Background="#F44336"
+            Foreground="White"
+            BorderBrush="#F44336"
+            Margin="20,0,0,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <!-- Mặc định ẩn -->
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Setter Property="ToolTip" Value="Xóa nhân viên đang chọn"/>
+
+                        <!-- Hiển thị khi có SelectedAdmin -->
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+
+        <!-- Status bar và tìm kiếm -->
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Nút Thêm -->
+            <Button Grid.Column="0"
+                    Content="Thêm nhân viên"
+                    Command="{Binding AddCommand}"
+                    Padding="15,8"
+                    Background="#623ed0"
+                    Foreground="White"
+                    BorderBrush="#623ed0"
+                    Margin="0,0,20,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsAdding}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <!-- Tìm kiếm -->
+            <TextBox Grid.Column="1"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Tìm kiếm theo tên hoặc tài khoản"
+                     Height="45"
+                     FontSize="14">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                        <Setter Property="Padding" Value="15,10"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsAdding}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+
+            <!-- Nút Refresh -->
+            <Button Grid.Column="2"
+                    Command="{Binding RefreshCommand}"
+                    ToolTip="Làm mới"
+                    Margin="10,0,0,0"
+                    Width="45"
+                    Height="45"
+                    Style="{StaticResource MaterialDesignFloatingActionButton}">
+                <materialDesign:PackIcon Kind="Refresh" Width="20" Height="20"/>
+            </Button>
+        </Grid>
+
+        <!-- Progress bar -->
+        <ProgressBar Grid.Row="2" Height="3" Margin="0,0,0,10"
+                     IsIndeterminate="{Binding IsLoading}">
+            <ProgressBar.Style>
+                <Style TargetType="ProgressBar">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ProgressBar.Style>
+        </ProgressBar>
+
+        <!-- Status message -->
+        <TextBlock Grid.Row="2" Margin="0,5,0,10"
+                   Text="{Binding StatusMessage}"
+                   Foreground="#666"
+                   FontSize="12"
+                   FontStyle="Italic"/>
+
+        <!-- Nội dung chính -->
+        <Grid Grid.Row="3">
+            <!-- Danh sách nhân viên -->
+            <DataGrid ItemsSource="{Binding AdminList}"
+                      SelectedItem="{Binding SelectedAdmin}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      IsReadOnly="True"
+                      RowHeight="50"
+                      Margin="0,0,0,20"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      SelectionMode="Single">
+                <DataGrid.Style>
+                    <Style TargetType="DataGrid">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsAdding}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding AdminList.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Style>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Họ và tên" 
+                                        Binding="{Binding Name}" 
+                                        Width="2*"/>
+                    <DataGridTextColumn Header="Tài khoản" 
+                                        Binding="{Binding Username}" 
+                                        Width="*"/>
+                    <DataGridTextColumn Header="Vai trò" 
+                                        Binding="{Binding RoleDisplay}" 
+                                        Width="*"/>
+                    <DataGridTextColumn Header="Trạng thái" 
+                                        Binding="{Binding StatusDisplay}" 
+                                        Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Thông báo không có dữ liệu -->
+            <Border Background="#F8F9FA" 
+                    CornerRadius="10"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Padding="30">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsAdding}" Value="False"/>
+                                    <Condition Binding="{Binding AdminList.Count}" Value="0"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <materialDesign:PackIcon Kind="AccountSearch" Width="50" Height="50" Foreground="#CCC"/>
+                    <TextBlock Text="Không có nhân viên nào" 
+                               Foreground="#999" 
+                               FontSize="16"
+                               Margin="0,10,0,0"/>
+                    <TextBlock Text="Nhấn 'Thêm nhân viên' để bắt đầu"
+                               Foreground="#AAA"
+                               FontSize="12"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Form thêm mới -->
+        <Border Grid.Row="4"
+                Background="#F8F9FA"
+                Padding="20"
+                CornerRadius="10"
+                BorderBrush="#E0E0E0"
+                BorderThickness="1"
+                Margin="0,20,0,0">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsAdding}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <TextBlock Grid.Row="0"
+                           Text="Thêm nhân viên mới"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,15"
+                           Foreground="#623ed0"/>
+
+                <!-- Form fields -->
+                <Grid Grid.Row="1" Margin="0,10,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Họ tên -->
+                    <TextBox Grid.Column="0"
+                             Text="{Binding NewAdmin.Name, 
+                                    ValidatesOnDataErrors=True, 
+                                    UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Họ và tên *"
+                             Style="{StaticResource FormTextBox}"/>
+
+                    <!-- Tài khoản -->
+                    <TextBox Grid.Column="2"
+                             Text="{Binding NewAdmin.Username, 
+                                    ValidatesOnDataErrors=True, 
+                                    UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Tài khoản đăng nhập *"
+                             Style="{StaticResource FormTextBox}"/>
+
+                    <!-- Mật khẩu -->
+                    <PasswordBox Grid.Column="4"
+                                 x:Name="PasswordBoxInput"
+                                 materialDesign:HintAssist.Hint="Mật khẩu *"
+                                 Margin="0,0,10,15"
+                                 Padding="10"
+                                 PasswordChanged="PasswordBox_PasswordChanged">
+                        <behaviors:Interaction.Behaviors>
+                            <utils:PasswordBoxBehavior Password="{Binding PasswordInput, Mode=TwoWay}"/>
+                        </behaviors:Interaction.Behaviors>
+                    </PasswordBox>
+
+                    <!-- Vai trò -->
+                    <ComboBox Grid.Column="6"
+                              SelectedItem="{Binding NewAdmin.Role}"
+                              ItemsSource="{StaticResource RoleItems}"
+                              materialDesign:HintAssist.Hint="Vai trò *"
+                              Margin="0,0,0,15"
+                              Padding="10"
+                              Height="45"/>
+                </Grid>
+
+                <!-- Action buttons -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Hủy"
+                            Command="{Binding CancelAddCommand}"
+                            Width="100"
+                            Margin="0,0,10,0"
+                            Background="#9E9E9E"
+                            Foreground="White">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Content="Lưu nhân viên"
+                            Command="{Binding SaveNewCommand}"
+                            Width="120"
+                            Background="#4CAF50"
+                            Foreground="White">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding NewAdmin.HasErrors}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                        <Setter Property="ToolTip" Value="Vui lòng sửa các lỗi trước khi lưu"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
