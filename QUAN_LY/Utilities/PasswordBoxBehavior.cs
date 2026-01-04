@@ -1,4 +1,4 @@
-﻿// QUAN_LY/Utilities/PasswordBoxBehavior.cs
+﻿
 using Microsoft.Xaml.Behaviors;
 using System.Windows;
 using System.Windows.Controls;
