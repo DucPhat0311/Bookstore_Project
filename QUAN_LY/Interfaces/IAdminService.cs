@@ -1,4 +1,4 @@
-﻿// QUAN_LY/Interfaces/IAdminService.cs
+﻿
 using QUAN_LY.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
