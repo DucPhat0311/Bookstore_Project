@@ -1,4 +1,4 @@
-﻿// QUAN_LY/Utilities/Converters.cs
+﻿
 using System;
 using System.Globalization;
 using System.Windows;
@@ -32,6 +32,7 @@ namespace QUAN_LY.Utilities
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
             => throw new NotImplementedException();
     }
+
     public class BooleanToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
