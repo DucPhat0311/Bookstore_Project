@@ -1,4 +1,4 @@
-﻿// QUAN_LY/Model/Admin.cs
+﻿
 using QUAN_LY.ViewModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -75,11 +75,26 @@ namespace QUAN_LY.Model
 
         public string StatusDisplay => IsActive ? "Đang làm việc" : "Đã nghỉ";
 
-        // Validation
-        // Trong class Admin
+      
         public void ValidateProperty()
         {
-            Validate("Password");
+            
+            if (AdminId == 0)
+            {
+                Validate("Password");
+            }
+            else
+            {
+             
+                if (_errors.ContainsKey("Password"))
+                    _errors.Remove("Password");
+            }
+
+            
+            Validate("Name");
+            Validate("Username");
+            Validate("Role");
+
             OnPropertyChanged(nameof(Error));
             OnPropertyChanged(nameof(HasErrors));
         }
@@ -100,7 +115,7 @@ namespace QUAN_LY.Model
 
         private Dictionary<string, string> _errors = new Dictionary<string, string>();
 
-        // IDataErrorInfo implementation
+      
         public string Error => string.Join("\n", _errors.Values.Where(v => !string.IsNullOrEmpty(v)));
         public string this[string columnName]
         {
