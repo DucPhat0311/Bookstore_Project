@@ -1,4 +1,4 @@
-﻿// QUAN_LY/ViewModel/AdminViewModel.cs
+﻿
 using QUAN_LY.Interfaces;
 using QUAN_LY.Model;
 using QUAN_LY.Services;
@@ -8,7 +8,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace QUAN_LY.ViewModel
@@ -33,8 +32,6 @@ namespace QUAN_LY.ViewModel
             {
                 _selectedAdmin = value;
                 OnPropertyChanged();
-                ClearPassword();
-                OnPropertyChanged(nameof(IsEditing));
             }
         }
 
@@ -71,27 +68,45 @@ namespace QUAN_LY.ViewModel
             set { _statusMessage = value; OnPropertyChanged(); }
         }
 
-        public bool IsEditing => SelectedAdmin != null;
+        // Form hiển thị khi thêm mới
+        private Admin _newAdmin;
+        public Admin NewAdmin
+        {
+            get => _newAdmin;
+            set { _newAdmin = value; OnPropertyChanged(); }
+        }
+
+        private bool _isAdding;
+        public bool IsAdding
+        {
+            get => _isAdding;
+            set { _isAdding = value; OnPropertyChanged(); }
+        }
 
         private CancellationTokenSource _cancellationTokenSource;
 
         public ICommand AddCommand { get; }
-        public ICommand EditCommand { get; }
+        public ICommand SaveNewCommand { get; }
+        public ICommand CancelAddCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand RefreshCommand { get; }
-        public ICommand CancelCommand { get; }
 
         public AdminViewModel()
         {
             _adminService = new AdminServiceSQL();
             _dialogService = new DialogService();
             AdminList = new ObservableCollection<Admin>();
+            NewAdmin = new Admin
+            {
+                Role = "Sale Staff",
+                IsActive = true
+            };
 
             AddCommand = new RelayCommand(ExecuteAdd);
-            EditCommand = new RelayCommand(ExecuteEdit, CanExecuteEdit);
+            SaveNewCommand = new RelayCommand(ExecuteSaveNew, CanExecuteSaveNew);
+            CancelAddCommand = new RelayCommand(ExecuteCancelAdd);
             DeleteCommand = new RelayCommand(ExecuteDelete, CanExecuteDelete);
             RefreshCommand = new RelayCommand(ExecuteRefresh);
-            CancelCommand = new RelayCommand(ExecuteCancel);
 
             LoadDataAsync().ConfigureAwait(false);
         }
@@ -146,7 +161,8 @@ namespace QUAN_LY.ViewModel
 
         private void ExecuteAdd(object obj)
         {
-            SelectedAdmin = new Admin
+            IsAdding = true;
+            NewAdmin = new Admin
             {
                 Role = "Sale Staff",
                 IsActive = true
@@ -155,72 +171,48 @@ namespace QUAN_LY.ViewModel
             StatusMessage = "Thêm nhân viên mới";
         }
 
-        private bool CanExecuteEdit(object obj)
+        private bool CanExecuteSaveNew(object obj)
         {
-            if (SelectedAdmin == null) return false;
+            if (NewAdmin == null) return false;
 
-            // Validate model
-            if (SelectedAdmin.AdminId == 0 && string.IsNullOrEmpty(PasswordInput))
+            // Chỉ validate khi thêm mới
+            if (string.IsNullOrEmpty(NewAdmin.Name) ||
+                string.IsNullOrEmpty(NewAdmin.Username) ||
+                string.IsNullOrEmpty(PasswordInput))
                 return false;
 
-            if (SelectedAdmin.HasErrors)
-                return false;
-
-            return true;
+            return !NewAdmin.HasErrors;
         }
 
         private bool CanExecuteDelete(object obj)
             => SelectedAdmin != null && SelectedAdmin.Role != "Super Admin";
 
-        private async void ExecuteEdit(object obj)
+        private async void ExecuteSaveNew(object obj)
         {
             try
             {
                 IsLoading = true;
-                StatusMessage = "Đang xử lý...";
+                StatusMessage = "Đang thêm nhân viên...";
 
-                if (SelectedAdmin.AdminId == 0)
+                // Set password
+                NewAdmin.Password = PasswordInput;
+
+                var result = await _adminService.AddAdminAsync(NewAdmin);
+                if (result.Success)
                 {
-                    // Set password for new admin
-                    SelectedAdmin.Password = PasswordInput;
-
-                    var result = await _adminService.AddAdminAsync(SelectedAdmin);
-                    if (result.Success)
-                    {
-                        await LoadDataAsync();
-                        SelectedAdmin = null;
-                        PasswordInput = "";
-                        await _dialogService.ShowSuccessAsync("Thành công", result.Message);
-                    }
-                    else
-                    {
-                        await _dialogService.ShowErrorAsync("Lỗi", result.Message);
-                    }
+                    await LoadDataAsync();
+                    IsAdding = false;
+                    PasswordInput = "";
+                    await _dialogService.ShowSuccessAsync("Thành công", result.Message);
                 }
                 else
                 {
-                    // Update existing admin
-                    if (!string.IsNullOrEmpty(PasswordInput))
-                    {
-                        SelectedAdmin.Password = PasswordInput;
-                    }
-
-                    var result = await _adminService.UpdateAdminAsync(SelectedAdmin);
-                    if (result.Success)
-                    {
-                        await LoadDataAsync();
-                        ClearPassword();
-                        await _dialogService.ShowSuccessAsync("Thành công", result.Message);
-                    }
-                    else
-                    {
-                        await _dialogService.ShowErrorAsync("Lỗi", result.Message);
-                    }
+                    await _dialogService.ShowErrorAsync("Lỗi", result.Message);
                 }
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowErrorAsync("Lỗi", $"Không thể lưu: {ex.Message}");
+                await _dialogService.ShowErrorAsync("Lỗi", $"Không thể thêm: {ex.Message}");
             }
             finally
             {
@@ -247,7 +239,6 @@ namespace QUAN_LY.ViewModel
                 if (result.Success)
                 {
                     await LoadDataAsync();
-                    SelectedAdmin = null;
                     await _dialogService.ShowSuccessAsync("Thành công", result.Message);
                 }
                 else
@@ -265,19 +256,13 @@ namespace QUAN_LY.ViewModel
             }
         }
 
+        private void ExecuteCancelAdd(object obj)
+        {
+            IsAdding = false;
+            PasswordInput = "";
+            StatusMessage = "Đã hủy thêm nhân viên";
+        }
+
         private void ExecuteRefresh(object obj) => LoadDataAsync().ConfigureAwait(false);
-
-        private void ExecuteCancel(object obj)
-        {
-            SelectedAdmin = null;
-            PasswordInput = "";
-            StatusMessage = "Đã hủy thao tác";
-        }
-
-        private void ClearPassword()
-        {
-            PasswordInput = "";
-            OnPropertyChanged(nameof(PasswordInput));
-        }
     }
 }
