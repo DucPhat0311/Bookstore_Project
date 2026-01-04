@@ -1,4 +1,5 @@
-﻿using QUAN_LY.ViewModel;
+﻿
+using QUAN_LY.ViewModel;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -22,16 +23,13 @@ namespace QUAN_LY.View
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (DataContext is AdminViewModel vm && vm.SelectedAdmin != null)
+            if (DataContext is AdminViewModel vm && vm.NewAdmin != null)
             {
                 vm.PasswordInput = ((PasswordBox)sender).Password;
 
-                // GỌI VALIDATION THỦ CÔNG
-                if (vm.SelectedAdmin.AdminId == 0) // Thêm mới
-                {
-                    vm.SelectedAdmin.Password = vm.PasswordInput;
-                    vm.SelectedAdmin.ValidateProperty();
-                }
+                // Set password để validate
+                vm.NewAdmin.Password = vm.PasswordInput;
+                vm.NewAdmin.ValidateProperty();
             }
         }
     }
