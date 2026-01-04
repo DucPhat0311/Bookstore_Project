@@ -3,16 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QUAN_LY.Model
 {
+    [Table("importreceipt")]
     public class ImportReceipt
     {
-        public int Id { get; set; } // import_id
-        public int PublisherId { get; set; }
+        [Key]
+        [Column("import_id")] // Kiểm tra trong DB xem là 'id' hay 'import_id' nhé
+        public int Id { get; set; }
+
+        [Column("admin_id")]
         public int AdminId { get; set; }
+
+        [Column("import_date")]
         public DateTime ImportDate { get; set; }
+
+        // Đây là chỗ gây lỗi vừa rồi, giờ đã map đúng
+        [Column("total_cost")]
         public decimal TotalCost { get; set; }
-        public int Status { get; set; } // 0: Preparing, 1: Imported
+
+        [Column("status")]
+        public int Status { get; set; }
     }
 }
