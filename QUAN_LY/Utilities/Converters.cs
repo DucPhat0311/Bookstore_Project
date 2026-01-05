@@ -1,11 +1,27 @@
 ﻿
 using System;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 
 namespace QUAN_LY.Utilities
 {
+    // Dùng để đảo ngược Ẩn/Hiệnbảng lịch sử nhập kho
+    public class InverseBooleanToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool boolValue)
+                return boolValue ? Visibility.Collapsed : Visibility.Visible;
+            return Visibility.Visible;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => value is Visibility v && v != Visibility.Visible;
+    }
+
+
     public class NullToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
