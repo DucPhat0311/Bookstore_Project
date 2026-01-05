@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace QUAN_LY.Model
 {
     // Nếu tên bảng trong DB khác tên class, bạn có thể thêm [Table("ten_bang")]
-    [Table("ImportDetail")]
+    [Table("importdetail")]
     public class ImportDetail
     {
         [Key]
@@ -19,13 +19,25 @@ namespace QUAN_LY.Model
         [Column("import_id")] // Ánh xạ với cột import_id
         public int importId { get; set; }
 
+        // THÊM DÒNG NÀY: Để EF hiểu importId chính là khóa ngoại của bảng ImportReceipt
+        [ForeignKey("importId")]
+        public virtual ImportReceipt ImportReceipt { get; set; }
+
         [Column("book_id")] // Ánh xạ với cột book_id
         public int BookId { get; set; }
+
+        [ForeignKey("BookId")]
+        public virtual Book Book { get; set; }
 
         [Column("quantity")] // Ánh xạ với cột quantity
         public int quantity { get; set; }
 
         [Column("import_price")] // Ánh xạ với cột import_price (Giá vốn)
         public decimal importPrice { get; set; }
+
+
+        [NotMapped]
+        public string BookTitle { get; set; }
+
     }
 }

@@ -16,13 +16,15 @@ namespace QUAN_LY.Model
         [Column("import_id")] // Kiểm tra trong DB xem là 'id' hay 'import_id' nhé
         public int Id { get; set; }
 
+        [Column("publisher_id")]
+        public int PublisherId { get; set; }
+
         [Column("admin_id")]
-        public int AdminId { get; set; }
+        public int? AdminId { get; set; }
 
         [Column("import_date")]
         public DateTime ImportDate { get; set; }
 
-        // Đây là chỗ gây lỗi vừa rồi, giờ đã map đúng
         [Column("total_cost")]
         public decimal TotalCost { get; set; }
 
