@@ -16,16 +16,16 @@ namespace QUAN_LY.Model
         public int Id { get; set; }
 
         [Column("order_id")]
-        public int OrderId { get; set; }
+        public int? OrderId { get; set; }
 
         [Column("book_id")]
-        public int BookId { get; set; }
+        public int? BookId { get; set; }
 
         [Column("quantity")]
-        public int Quantity { get; set; }
+        public int? Quantity { get; set; }
 
-        [Column("price")]
-        public decimal Price { get; set; }
+        [Column("unit_price")] // mới đầu chỗ này ánh xạ sai ghi price
+        public decimal? Price { get; set; }
     }
 
 }
