@@ -98,8 +98,8 @@ namespace QUAN_LY.ViewModel
             {
                 // Tính toán (giữ nguyên TotalRevenue, nhưng cập nhật từ DB)
                 TotalRevenue = _dbContext.Orders
-                             .Where(o => o.Status == 1)
-                             .Sum(o => o.TotalAmount);  // Nếu sai, thay thành o.total_amount
+                 .Where(o => o.Status == 1)
+                 .Sum(o => o.TotalAmount) ?? 0;  // Nếu sai, thay thành o.total_amount
 
                 // Cập nhật: Tính TotalCapital từ total_cost trong ImportReceipts (thay vì từ ImportDetails)
                 TotalCapital = _dbContext.ImportReceipts
@@ -119,7 +119,7 @@ namespace QUAN_LY.ViewModel
                     .Where(x => x.ir.Status == 1)
                     .Sum(x => x.oi.Quantity * x.id.importPrice);
 
-                TotalProfit = totalRevenueFromBooks - totalImportCost;
+                TotalProfit = (totalRevenueFromBooks ?? 0) - (totalImportCost ?? 0);
 
                 // Biểu đồ – Thay đổi để hiển thị theo 7 ngày gần nhất, với đường cong màu (thay vì chỉ tổng)
                 var revenueData = new ChartValues<decimal>();
@@ -189,14 +189,14 @@ namespace QUAN_LY.ViewModel
                 // Top 5 (giữ nguyên, cập nhật từ DB)
                 TopSellingBooks = _dbContext.Books
                     .GroupJoin(_dbContext.OrderItems, b => b.Id, oi => oi.BookId, (b, ois) => new { Book = b, TotalSold = ois.Sum(oi => oi.Quantity) })
-                    .Select(x => new BookSales { BookTitle = x.Book.Title, TotalSold = x.TotalSold })
+                    .Select(x => new BookSales { BookTitle = x.Book.Title, TotalSold = x.TotalSold ?? 0 })
                     .OrderByDescending(bs => bs.TotalSold)
                     .Take(5)
                     .ToList();
 
                 LeastSellingBooks = _dbContext.Books
                     .GroupJoin(_dbContext.OrderItems, b => b.Id, oi => oi.BookId, (b, ois) => new { Book = b, TotalSold = ois.Sum(oi => oi.Quantity) })
-                    .Select(x => new BookSales { BookTitle = x.Book.Title, TotalSold = x.TotalSold })
+                    .Select(x => new BookSales { BookTitle = x.Book.Title, TotalSold = x.TotalSold ?? 0 })
                     .OrderBy(bs => bs.TotalSold)
                     .Take(5)
                     .ToList();
