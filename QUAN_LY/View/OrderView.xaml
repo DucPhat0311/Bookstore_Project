@@ -5,10 +5,125 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:QUAN_LY.View"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <Border Background="#e34dd5">
+             d:DesignHeight="600" d:DesignWidth="1000">
 
-        </Border>
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid Background="#F0F3F7">
+        <DockPanel Margin="20">
+            <TextBlock DockPanel.Dock="Top" Text="QUẢN LÝ HÓA ĐƠN" 
+                       FontSize="26" FontWeight="Bold" Foreground="#2C3E50" Margin="0,0,0,20"/>
+
+            <Border Background="White" CornerRadius="12" Padding="15">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.1" Color="Gray"/>
+                </Border.Effect>
+
+                <DataGrid ItemsSource="{Binding OrderList}" 
+                          SelectedItem="{Binding SelectedOrder}" 
+                          AutoGenerateColumns="False" 
+                          IsReadOnly="True"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          GridLinesVisibility="None"
+                          RowHeight="45"
+                          HeadersVisibility="Column"
+                          CanUserAddRows="False">
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F8F9FA"/>
+                            <Setter Property="Foreground" Value="#5D6D7E"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="10,5"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#EBEDEF"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Mã HĐ" Binding="{Binding Id}" Width="80"/>
+                        <DataGridTextColumn Header="Ngày lập" Binding="{Binding OrderDate, StringFormat='dd/MM/yyyy HH:mm'}" Width="180"/>
+
+                        <DataGridTextColumn Header="Tổng tiền (VNĐ)" Binding="{Binding TotalAmount, StringFormat='N0'}" Width="150">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="#27AE60"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="Margin" Value="0,0,15,0"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Ghi chú" Binding="{Binding Note}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </DockPanel>
+
+        <Grid Background="#66000000" Visibility="{Binding IsPopupOpen, Converter={StaticResource BoolToVis}}">
+            <Border Background="White" Width="650" Height="450" 
+                    VerticalAlignment="Center" HorizontalAlignment="Center" 
+                    CornerRadius="15">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="30" ShadowDepth="0" Opacity="0.4"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="#3498DB" CornerRadius="15,15,0,0" Padding="20,15">
+                        <DockPanel>
+                            <Button Command="{Binding ClosePopupCommand}" Content="✕" 
+                                    DockPanel.Dock="Right" Background="Transparent" 
+                                    BorderThickness="0" Foreground="White" 
+                                    FontSize="18" FontWeight="Bold" Cursor="Hand"/>
+                            <TextBlock Text="CHI TIẾT MẶT HÀNG" Foreground="White" 
+                                       FontSize="18" FontWeight="Bold"/>
+                        </DockPanel>
+                    </Border>
+
+                    <DataGrid Grid.Row="1" Margin="15" 
+                              ItemsSource="{Binding OrderDetailList}" 
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              Background="Transparent" BorderThickness="0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Tên sách" Binding="{Binding BookTitle}" Width="*"/>
+                            <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity}" Width="80"/>
+                            <DataGridTextColumn Header="Đơn giá" Binding="{Binding Price, StringFormat='N0'}" Width="120"/>
+                            <DataGridTextColumn Header="Thành tiền" Binding="{Binding SubTotal, StringFormat='N0'}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Grid.Row="2" Background="#F8F9FA" CornerRadius="0,0,15,15" Padding="15">
+                        <Button Content="Đóng" Command="{Binding ClosePopupCommand}" 
+                                Width="100" Height="35" Background="#95A5A6" 
+                                Foreground="White" FontWeight="Bold" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
