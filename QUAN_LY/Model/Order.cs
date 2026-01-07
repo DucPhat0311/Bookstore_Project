@@ -16,19 +16,19 @@ namespace QUAN_LY.Model
         public int Id { get; set; }
 
         [Column("admin_id")]
-        public int AdminId { get; set; }
+        public int? AdminId { get; set; }
 
         [Column("order_date")]
-        public DateTime OrderDate { get; set; }
+        public DateTime? OrderDate { get; set; }
 
         [Column("total_amount")]
-        public decimal TotalAmount { get; set; }
+        public decimal? TotalAmount { get; set; }
 
         [Column("status")]
-        public int Status { get; set; }
+        public int? Status { get; set; }
 
         [Column("note")]
-        public string Note { get; set; }
+        public string? Note { get; set; }
     }
 }
 
