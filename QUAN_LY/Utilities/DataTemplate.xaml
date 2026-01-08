@@ -20,7 +20,9 @@
     <DataTemplate DataType="{x:Type vm:AdminViewModel}">
         <view:AdminView/>
     </DataTemplate>
-
+    <DataTemplate DataType="{x:Type vm:PosViewModel}">
+        <view:PosView/>
+    </DataTemplate>
 
 
 </ResourceDictionary>
