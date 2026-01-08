@@ -62,7 +62,22 @@
                                     <TextBlock Text="Home"/>
                                 </StackPanel>
                             </Button>
+                            
+                            <Button Style="{StaticResource menuButton}"
 
+                                    Command="{Binding NavigateCommand}"
+
+                                    CommandParameter="SellBook">
+
+                                <StackPanel Orientation="Horizontal">
+
+                                    <Icon:PackIconMaterial Kind="Shopping" Style="{StaticResource menuButtonIcon}"/>
+
+                                    <TextBlock Text="Sell Book"/>
+
+                                </StackPanel>
+
+                            </Button>
                             <!-- Nút Order (Bán hàng) -->
                             <Button Style="{StaticResource menuButton}"
                                     Command="{Binding NavigateCommand}"
