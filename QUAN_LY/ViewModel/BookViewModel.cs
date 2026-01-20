@@ -17,13 +17,11 @@ namespace QUAN_LY.ViewModel
     {
         private readonly IBookService _bookService;
 
-        // --- BIẾN DỮ LIỆU ---
-        private List<Book> _masterList;    // Kho chứa tất cả sách
-        private List<Book> _filteredList;  // Danh sách sau khi tìm kiếm & sắp xếp
+        private List<Book> _masterList;    // biến này chứa tất cả các sách
+        private List<Book> _filteredList;  // biến này chứa các sách sau khi đã lọc và tìm kiếm 
 
-        // --- PHÂN TRANG ---
-        private int _currentPage = 1;
-        private int _itemsPerPage = 8;
+        private int _currentPage = 1; // trang hiện tại
+        private int _itemsPerPage = 8; // số sách hiện lên trên mỗi trang
 
         public int CurrentPage
         {
@@ -32,13 +30,11 @@ namespace QUAN_LY.ViewModel
             {
                 _currentPage = value;
                 OnPropertyChanged();
-                // Cập nhật trạng thái nút bấm
                 (NextPageCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (PreviousPageCommand as RelayCommand)?.RaiseCanExecuteChanged();
             }
         }
 
-        // List hiển thị lên View 
         private ObservableCollection<Book> _displayItems;
         public ObservableCollection<Book> DisplayItems
         {
@@ -53,7 +49,6 @@ namespace QUAN_LY.ViewModel
             set { _selectedBook = value; OnPropertyChanged(); }
         }
 
-        // --- TÌM KIẾM ---
         private string _searchKeyword;
         public string SearchKeyword
         {
@@ -66,7 +61,6 @@ namespace QUAN_LY.ViewModel
             }
         }
 
-        // --- SẮP XẾP ---
         public List<string> SortOptions { get; } = new List<string>
         {
             "Mặc định",
@@ -87,7 +81,6 @@ namespace QUAN_LY.ViewModel
             }
         }
 
-        // --- BIẾN LỌC ---
         private Subject _selectedFilterSubject;
         public Subject SelectedFilterSubject
         {
@@ -126,7 +119,7 @@ namespace QUAN_LY.ViewModel
 
         public ICommand ClearFilterCommand { get; set; }
 
-        // --- COMBOBOX DATA ---
+        // 3 cái COMBOBOX cho Publisher, Author, Subject
         private List<Publisher> _publisherList;
         public List<Publisher> PublisherList { get => _publisherList; set { _publisherList = value; OnPropertyChanged(); } }
 
@@ -136,7 +129,7 @@ namespace QUAN_LY.ViewModel
         private List<Subject> _subjectList;
         public List<Subject> SubjectList { get => _subjectList; set { _subjectList = value; OnPropertyChanged(); } }
 
-        // --- COMMANDS ---
+        // Các nút Command
         public ICommand AddCommand { get; set; }
         public ICommand EditCommand { get; set; }
         public ICommand DeleteCommand { get; set; }
@@ -148,13 +141,11 @@ namespace QUAN_LY.ViewModel
 
         public BookViewModel()
         {
-            // Khởi tạo Service 
             _bookService = new BookServiceSQL();
             DisplayItems = new ObservableCollection<Book>();
 
-            LoadData(); // Load lần đầu
+            LoadData(); 
 
-            // --- KHỞI TẠO COMMAND ---
             NextPageCommand = new RelayCommand(
                 _ => { CurrentPage++; UpdatePagination(); },
                 _ => CanNext()
@@ -167,7 +158,6 @@ namespace QUAN_LY.ViewModel
 
             SearchCommand = new RelayCommand(_ => ApplyFilters());
 
-            // Command Thêm
             AddCommand = new RelayCommand<object>(
                 (p) =>
                 {
@@ -190,7 +180,6 @@ namespace QUAN_LY.ViewModel
                 }
             );
 
-            // Command Sửa
             EditCommand = new RelayCommand<object>(
                 (p) =>
                 {
@@ -209,7 +198,6 @@ namespace QUAN_LY.ViewModel
                 (p) => SelectedBook != null && SelectedBook.Id > 0
             );
 
-            // Command Xóa
             DeleteCommand = new RelayCommand<object>(
                 (p) =>
                 {
@@ -244,7 +232,7 @@ namespace QUAN_LY.ViewModel
             ClearFilterCommand = new RelayCommand(
         _ =>
         {
-            // Reset tất cả về null/rỗng
+            // Reset tất cả các bộ lọc về mặc định
             SearchKeyword = string.Empty;
             SelectedFilterSubject = null;
             SelectedFilterAuthor = null;
@@ -255,70 +243,57 @@ namespace QUAN_LY.ViewModel
     );
         }
 
-        // --- CÁC HÀM XỬ LÝ LOGIC ---
-
+        // Load dữ liệu ban đầu
         void LoadData()
         {
             _masterList = _bookService.GetAllBooksForManagement();
 
-            // Load ComboBox data
             PublisherList = _bookService.GetAllPublishers();
             AuthorList = _bookService.GetAllAuthors();
             SubjectList = _bookService.GetAllSubjects();
 
             SelectedBook = new Book();
 
-            // Reset danh sách lọc = danh sách gốc
             _filteredList = new List<Book>(_masterList);
 
-            // Đặt mặc định sắp xếp
             SelectedSortOption = "Mặc định";
 
-            // Tìm kiếm (nếu có từ khóa cũ) -> Sắp xếp -> Phân trang
             ApplyFilters();
         }
 
-      
 
-        // Hàm xử lý trung tâm: Tìm kiếm + Lọc + Sắp xếp
+        // Tìm kiếm
         private void ApplyFilters()
         {
-            // Bắt đầu từ danh sách gốc
             var query = _masterList.AsEnumerable();
 
-            // Lọc theo TỪ KHÓA TÌM KIẾM
             if (!string.IsNullOrWhiteSpace(SearchKeyword))
             {
                 string key = SearchKeyword.ToLower();
                 query = query.Where(x => x.Title.ToLower().Contains(key));
             }
 
-            // Lọc theo THỂ LOẠI
             if (SelectedFilterSubject != null)
             {
                 query = query.Where(x => x.SubjectId == SelectedFilterSubject.Id);
             }
 
-            // Lọc theo TÁC GIẢ
             if (SelectedFilterAuthor != null)
             {
                 query = query.Where(x => x.AuthorId == SelectedFilterAuthor.Id);
             }
 
-            // Lọc theo NHÀ XUẤT BẢN
             if (SelectedFilterPublisher != null)
             {
                 query = query.Where(x => x.PublisherId == SelectedFilterPublisher.Id);
             }
 
-            // Lưu kết quả lọc tạm thời
             _filteredList = query.ToList();
 
-            // Gọi hàm Sắp xếp (Hàm này sẽ gọi tiếp Phân trang)
             ApplySort();
         }
 
-        // SẮP XẾP
+        // Sắp xếp
         private void ApplySort()
         {
             if (_filteredList == null) return;
@@ -339,19 +314,19 @@ namespace QUAN_LY.ViewModel
                     break;
             }
 
-            // Sau khi sắp xếp xong thì Reset về trang 1 và hiển thị
+            // Sắp xếp xong ==> Reset về trang 1
             CurrentPage = 1;
             UpdatePagination();
         }
 
-        // PHÂN TRANG 
+
+        // Phân trang
         void UpdatePagination()
         {
             if (_filteredList == null) return;
 
             DisplayItems.Clear();
 
-            // Skip và Take dựa trên _filteredList đã được Tìm kiếm và Sắp xếp
             var items = _filteredList.Skip((CurrentPage - 1) * _itemsPerPage).Take(_itemsPerPage).ToList();
 
             foreach (var item in items)

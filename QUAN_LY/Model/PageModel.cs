@@ -44,6 +44,9 @@ namespace QUAN_LY.ViewModel
                 case "Home":
                     CurrentViewModel = new HomeViewModel();
                     break;
+                case "SellBook":
+                    CurrentViewModel = new PosViewModel();
+                    break;
                 case "Order":
                     CurrentViewModel = new OrderViewModel();
                     break;
