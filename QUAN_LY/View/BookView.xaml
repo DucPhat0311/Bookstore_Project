@@ -213,26 +213,51 @@
                 </materialDesign:Card>
 
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
+       
                     <StackPanel>
                         <TextBlock Text="Tên sách" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
                         <TextBox Text="{Binding SelectedBook.Title, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                          materialDesign:HintAssist.Hint="Nhập tên sách đầy đủ"
                          Style="{DynamicResource MaterialDesignOutlinedTextBox}"
                          Margin="0,0,0,16" FontSize="14"/>
+                        <TextBlock Text="Mã ISBN" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0"
+             Text="{Binding SelectedBook.Isbn, UpdateSourceTrigger=PropertyChanged}"
+             materialDesign:HintAssist.Hint="Nhập 13 số ISBN (VD: 9786047726058)"
+             Style="{DynamicResource MaterialDesignOutlinedTextBox}"
+             FontSize="14" VerticalAlignment="Center"/>
+
+                            <Button Grid.Column="1"
+            Command="{Binding AutoFillCommand}"
+            Style="{DynamicResource MaterialDesignOutlinedButton}"
+            Margin="10,0,0,0"
+            ToolTip="Tự động lấy tên sách, tác giả, ảnh bìa từ Internet">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="CloudDownload" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="LẤY THÔNG TIN"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
 
                         <Grid Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0" Margin="0,0,0,0">
+                            <StackPanel Grid.Column="0">
                                 <TextBlock Text="Tác giả" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
                                 <ComboBox ItemsSource="{Binding AuthorList}"
-                                DisplayMemberPath="Name" 
-                                SelectedValuePath="Id"
-                                SelectedValue="{Binding SelectedBook.AuthorId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"     
-                                materialDesign:HintAssist.Hint="Chọn Tác giả"
-                                Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
+                  DisplayMemberPath="Name" 
+                  SelectedValuePath="Id"
+                  SelectedValue="{Binding SelectedBook.AuthorId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"      
+                  materialDesign:HintAssist.Hint="Chọn Tác giả"
+                  Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
                             </StackPanel>
                         </Grid>
 

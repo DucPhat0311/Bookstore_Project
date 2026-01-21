@@ -2,7 +2,8 @@
 using QUAN_LY.Interfaces;
 using QUAN_LY.Model;
 using QUAN_LY.Services;
-using QUAN_LY.Utilities; 
+using QUAN_LY.Utilities;
+using QUAN_LY_APP.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -139,12 +140,31 @@ namespace QUAN_LY.ViewModel
         public ICommand SearchCommand { get; }
         public ICommand UploadImageCommand { get; }
 
+        public ICommand AutoFillCommand { get; set; }
+
         public BookViewModel()
         {
             _bookService = new BookServiceSQL();
             DisplayItems = new ObservableCollection<Book>();
 
-            LoadData(); 
+            LoadData();
+
+            // Khởi tạo lệnh gọi API
+            AutoFillCommand = new RelayCommand<object>(
+                async (p) =>
+                {
+                    if (SelectedBook == null) return; 
+
+                    if (string.IsNullOrEmpty(SelectedBook.Isbn))
+                    {
+                        MessageBox.Show("Vui lòng nhập mã ISBN trước!", "Thông báo");
+                        return;
+                    }
+                    await ExecuteAutoFill();
+                },
+                (p) => { return SelectedBook != null; }
+            );
+
 
             NextPageCommand = new RelayCommand(
                 _ => { CurrentPage++; UpdatePagination(); },
@@ -241,6 +261,29 @@ namespace QUAN_LY.ViewModel
             ApplyFilters();
         }
     );
+
+       }
+        private async Task ExecuteAutoFill()
+        {
+            var apiService = new GoogleBooksService();
+            var info = await apiService.GetBookInfo(SelectedBook.Isbn);
+
+            if (info != null)
+            {
+                // Điền Tên sách
+                SelectedBook.Title = info.Title;
+
+                // Điền Ảnh 
+                SelectedBook.ImageUrl = info.ImageLinks?.Thumbnail;            
+
+                // Cập nhật giao diện 
+                OnPropertyChanged(nameof(SelectedBook));
+                MessageBox.Show("Đã lấy dữ liệu thành công!", "Google Books API");
+            }
+            else
+            {
+                MessageBox.Show("Không tìm thấy sách với mã ISBN này.", "Lỗi");
+            }
         }
 
         // Load dữ liệu ban đầu
