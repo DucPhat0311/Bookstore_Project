@@ -5,7 +5,7 @@
              xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:vm="clr-namespace:QUAN_LY.ViewModel"
              xmlns:view="clr-namespace:QUAN_LY.View"
-             StartupUri="View/MainWindowView.xaml">
+             StartupUri="View/LoginWindowView.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
