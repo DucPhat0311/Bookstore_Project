@@ -56,6 +56,28 @@ namespace QUAN_LY.Services
             }
         }
 
+
+        public async Task<Admin> LoginAsync(string username, string password)
+        {
+            var admin = await _context.Admins
+                .FirstOrDefaultAsync(a => a.Username == username && a.IsActive);
+
+            if (admin == null) return null;
+
+           
+          
+
+           
+            bool isValid = BCrypt.Net.BCrypt.Verify(password, admin.PasswordHash);
+
+            if (isValid)
+            {
+                return admin;
+            }
+
+            return null;
+        }
+
         public async Task<(bool Success, string Message)> UpdateAdminAsync(Admin admin)
         {
             try
@@ -132,7 +154,7 @@ namespace QUAN_LY.Services
         {
             var admin = await _context.Admins.FindAsync(adminId);
             if (admin == null) return false;
-
+     
             return BCrypt.Net.BCrypt.Verify(password, admin.PasswordHash);
         }
     }
