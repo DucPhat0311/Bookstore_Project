@@ -1,37 +1,34 @@
-﻿using System.Windows;
+﻿using QUAN_LY.ViewModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace QUAN_LY
 {
     public partial class LoginWindowView : Window
     {
+        private readonly LoginViewModel _viewModel;
+
         public LoginWindowView()
         {
             InitializeComponent();
 
-            // Focus vào username textbox
+            
+            _viewModel = new LoginViewModel();
+            this.DataContext = _viewModel;
+
+            
             txtUsername.Focus();
         }
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
-            string username = txtUsername.Text.Trim();
-            string password = txtPassword.Password;
+           
+            _viewModel.Password = txtPassword.Password;
 
-            // Kiểm tra đăng nhập đơn giản
-            if (username == "admin" && password == "admin123")
+          
+            if (_viewModel.LoginCommand.CanExecute(null))
             {
-                // Tạo và hiển thị MainWindow
-                MainWindowView mainWindow = new MainWindowView();
-                mainWindow.Show();
-
-                // Đóng cửa sổ login
-                this.Close();
-            }
-            else
-            {
-                txtError.Text = "Tên đăng nhập hoặc mật khẩu không đúng!";
-                txtError.Visibility = Visibility.Visible;
+                _viewModel.LoginCommand.Execute(null);
             }
         }
 
@@ -40,13 +37,19 @@ namespace QUAN_LY
             Application.Current.Shutdown();
         }
 
-        // Cho phép kéo window
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
                 this.DragMove();
         }
 
-
+       
+        private void txtPassword_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                BtnLogin_Click(sender, e);
+            }
+        }
     }
 }
