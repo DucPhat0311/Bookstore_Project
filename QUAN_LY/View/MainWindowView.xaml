@@ -39,96 +39,101 @@
                 <Border Grid.Row="1" Background="#623ed0" CornerRadius="0 50 0 30">
                     <DockPanel>
                         <Border Width="80" Height="80" Padding="3" Background="White" CornerRadius="100"
-                                DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="20 -30 0 0">
-                            <Ellipse>
-                                <Ellipse.Fill>
-                                    <ImageBrush ImageSource="/Images/LOGO.jpg"/>
-                                </Ellipse.Fill>
-                            </Ellipse>
+        DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="20 -30 0 0">
+                            <Grid>
+                                <Ellipse>
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush Color="#FF623ED0"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+
+                                <TextBlock Text="{Binding UserInitials}" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center"
+                   Foreground="White"
+                   FontSize="28"
+                   FontWeight="Bold"/>
+                            </Grid>
                         </Border>
 
-                        <TextBlock Text="ADVT" Foreground="White" FontSize="22" FontWeight="SemiBold"
-                                   DockPanel.Dock="Top" TextAlignment="Center" Margin="5 25 0 10"/>
+                        <TextBlock Text="{Binding UserFullName}" 
+           Foreground="White" 
+           FontSize="16" 
+           FontWeight="SemiBold"
+           DockPanel.Dock="Top" 
+           TextAlignment="Center" 
+           Margin="5 25 0 10"
+           TextWrapping="Wrap"/>
 
                         <Separator Margin="25" DockPanel.Dock="Top" Height="0.8" Background="#7e5fdc"/>
 
                         <StackPanel DockPanel.Dock="Top">
-                            <!-- Nút Home -->
                             <Button Style="{StaticResource menuButton}"
-                                    Command="{Binding NavigateCommand}"
-                                    CommandParameter="Home">
+            Command="{Binding NavigateCommand}"
+            CommandParameter="Home"
+            Visibility="{Binding DashboardVisibility}">
                                 <StackPanel Orientation="Horizontal">
                                     <Icon:PackIconMaterial Kind="Home" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Home"/>
                                 </StackPanel>
                             </Button>
-                            
+
                             <Button Style="{StaticResource menuButton}"
-
-                                    Command="{Binding NavigateCommand}"
-
-                                    CommandParameter="SellBook">
-
+            Command="{Binding NavigateCommand}"
+            CommandParameter="SellBook">
                                 <StackPanel Orientation="Horizontal">
-
                                     <Icon:PackIconMaterial Kind="Shopping" Style="{StaticResource menuButtonIcon}"/>
-
                                     <TextBlock Text="Sell Book"/>
-
                                 </StackPanel>
-
                             </Button>
-                            <!-- Nút Order (Bán hàng) -->
+
                             <Button Style="{StaticResource menuButton}"
-                                    Command="{Binding NavigateCommand}"
-                                    CommandParameter="Order">
+            Command="{Binding NavigateCommand}"
+            CommandParameter="Order">
                                 <StackPanel Orientation="Horizontal">
                                     <Icon:PackIconMaterial Kind="FileDocumentEdit" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Order"/>
                                 </StackPanel>
                             </Button>
 
-                            <!-- Nút Book (Quản lý sách) -->
                             <Button Style="{StaticResource menuButton}"
-                                    Command="{Binding NavigateCommand}"
-                                    CommandParameter="Book">
+        Command="{Binding NavigateCommand}"
+        CommandParameter="Book">
                                 <StackPanel Orientation="Horizontal">
                                     <Icon:PackIconMaterial Kind="BookMultiple" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Book"/>
                                 </StackPanel>
                             </Button>
 
-                            <!-- Nút Inventory (Tồn kho) -->
                             <Button Style="{StaticResource menuButton}"
-                                    Command="{Binding NavigateCommand}"
-                                    CommandParameter="Inventory">
+            Command="{Binding NavigateCommand}"
+            CommandParameter="Inventory"
+            Visibility="{Binding DashboardVisibility}">
                                 <StackPanel Orientation="Horizontal">
                                     <Icon:PackIconMaterial Kind="Library" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Inventory"/>
                                 </StackPanel>
                             </Button>
 
-                            <!-- Nút Revenue Statistics (Doanh thu) -->
                             <Button Style="{StaticResource menuButton}"
-                                    Command="{Binding NavigateCommand}"
-                                    CommandParameter="RevenueStatistics">
+            Command="{Binding NavigateCommand}"
+            CommandParameter="RevenueStatistics"
+            Visibility="{Binding DashboardVisibility}">
                                 <StackPanel Orientation="Horizontal">
                                     <Icon:PackIconMaterial Kind="Finance" Style="{StaticResource menuButtonIcon}"/>
                                     <TextBlock Text="Revenue Statistics"/>
                                 </StackPanel>
                             </Button>
 
-                            <!-- NÚT QUẢN LÝ NHÂN VIÊN  -->
                             <Button Style="{StaticResource menuButton}"
-                                    Command="{Binding NavigateCommand}"
-                                    CommandParameter="Admin">
+            Command="{Binding NavigateCommand}"
+            CommandParameter="Admin"
+            Visibility="{Binding AdminTabVisibility}">
                                 <StackPanel Orientation="Horizontal">
                                     <Icon:PackIconMaterial Kind="AccountGroup" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Quản lý nhân viên"/>
+                                    <TextBlock Text="Employee management"/>
                                 </StackPanel>
                             </Button>
-                       
-
                         </StackPanel>
 
                         <!-- Nút Logout ở dưới cùng -->
@@ -159,6 +164,9 @@
                 </Grid.RowDefinitions>
 
                 <!-- Thanh tìm kiếm và các icon trên cùng -->
+                
+                <!-- thien xoa thanh search va sua nut cai dat thanh thoat
+                
                 <Grid Width="300" HorizontalAlignment="Left" Grid.Row="0">
                     <TextBlock Margin="20 0" VerticalAlignment="Center" Foreground="#b0b9c6" IsHitTestVisible="False"
                                Panel.ZIndex="1" Text="Search here ..."
@@ -167,9 +175,14 @@
                     <Icon:PackIconMaterial Kind="Magnify" Width="15" Height="15" VerticalAlignment="Center"
                                            Margin="0 0 15 0" Foreground="#b0b9c6" HorizontalAlignment="Right"/>
                 </Grid>
-
-                <Button Style="{StaticResource topButton}" Margin="0 0 20 0" Background="#dcdcdc" HorizontalAlignment="Right" Grid.Row="0">
-                    <Icon:PackIconMaterial Kind="Cog"/>
+-->
+                <Button Style="{StaticResource topButton}" 
+        Margin="0 0 20 0" 
+        HorizontalAlignment="Right" 
+        Grid.Row="0"
+        Click="CloseApp_Click" 
+        Background="Transparent">
+                    <Icon:PackIconMaterial Kind="Close" Foreground="#FF4444" Width="20" Height="20"/>
                 </Button>
 
                 <Button Style="{StaticResource topButton}" Margin="0 0 55 0" HorizontalAlignment="Right" Grid.Row="0">
