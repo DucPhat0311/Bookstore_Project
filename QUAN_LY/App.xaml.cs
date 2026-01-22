@@ -1,15 +1,19 @@
 ﻿using System.Windows;
 using QUAN_LY.Model;
-using QUAN_LY.View;
-
-using QUAN_LY.Services;
 
 namespace QUAN_LY
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
+        // Biến static để truy cập từ toàn bộ dự án: App.CurrentUser
+        public static Admin CurrentUser { get; set; }
+
+        // Định nghĩa các Role cứng để tránh gõ sai chính tả sau này
+        public static class Roles
+        {
+            public const string SuperAdmin = "Super Admin";
+            public const string Manager = "Manager";
+            public const string SaleStaff = "Sale Staff";
+        }
     }
 }

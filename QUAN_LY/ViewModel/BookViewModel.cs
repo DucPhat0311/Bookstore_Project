@@ -24,6 +24,12 @@ namespace QUAN_LY.ViewModel
         private int _currentPage = 1; // trang hiện tại
         private int _itemsPerPage = 8; // số sách hiện lên trên mỗi trang
 
+        private bool _isAdminOrManager;
+        public bool IsAdminOrManager
+            {
+            get => _isAdminOrManager;
+            set { _isAdminOrManager = value; OnPropertyChanged(); }
+        }
         public int CurrentPage
         {
             get => _currentPage;
@@ -147,6 +153,7 @@ namespace QUAN_LY.ViewModel
             _bookService = new BookServiceSQL();
             DisplayItems = new ObservableCollection<Book>();
 
+            CheckUserRole();
             LoadData();
 
             // Khởi tạo lệnh gọi API
@@ -263,6 +270,23 @@ namespace QUAN_LY.ViewModel
     );
 
        }
+        private void CheckUserRole()
+        {
+            if (App.CurrentUser != null)
+            {
+                // Nếu là Manager hoặc Super Admin thì là True (Được sửa)
+                // Nếu là Sale Staff thì là False (Chỉ xem)
+                if (App.CurrentUser.Role == App.Roles.Manager ||
+                    App.CurrentUser.Role == App.Roles.SuperAdmin)
+                {
+                    IsAdminOrManager = true;
+                }
+                else
+                {
+                    IsAdminOrManager = false;
+                }
+            }
+        }
         private async Task ExecuteAutoFill()
         {
             var apiService = new GoogleBooksService();

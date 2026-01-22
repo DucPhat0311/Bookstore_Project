@@ -6,9 +6,7 @@ using QUAN_LY.ViewModel;
 
 namespace QUAN_LY
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+    
     public partial class MainWindowView : Window
     {
         public MainWindowView()
@@ -43,23 +41,24 @@ namespace QUAN_LY
                 }
             }
         }
+        private void CloseApp_Click(object sender, RoutedEventArgs e)
+        {
+            
+            Application.Current.Shutdown();
+        }
+
+
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            // Xác nhận đăng xuất
-            MessageBoxResult result = MessageBox.Show("Bạn có muốn đăng xuất?",
-                                                    "Xác nhận",
-                                                    MessageBoxButton.YesNo,
-                                                    MessageBoxImage.Question);
+           
+            App.CurrentUser = null;
 
-            if (result == MessageBoxResult.Yes)
-            {
-                // Đóng MainWindow
-                this.Close();
+           
+            LoginWindowView loginWindow = new LoginWindowView();
+            loginWindow.Show();
 
-                // Mở lại LoginWindow
-                LoginWindowView loginWindow = new LoginWindowView();
-                loginWindow.Show();
-            }
+            
+            this.Close();
         }
     }
 }

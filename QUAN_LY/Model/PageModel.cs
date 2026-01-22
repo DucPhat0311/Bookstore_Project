@@ -1,44 +1,116 @@
-﻿using System.Windows.Input;
-using QUAN_LY.Utilities; 
+﻿using System.Windows;
+using System.Windows.Input;
+using QUAN_LY.Utilities;
 using QUAN_LY.Model;
+using QUAN_LY.View;
+using System.Linq; 
 
 namespace QUAN_LY.ViewModel
 {
-    // Lớp ViewModel chính cho MainWindow, quản lý việc chuyển đổi View
     public class PageModel : BaseViewModel
     {
+       
         private object _currentViewModel;
-        // Thuộc tính mà ContentControl trong MainWindow.xaml sẽ bind tới
         public object CurrentViewModel
         {
             get { return _currentViewModel; }
-            set
-            {
-                _currentViewModel = value;
-                OnPropertyChanged(nameof(CurrentViewModel));
-            }
+            set { _currentViewModel = value; OnPropertyChanged(); }
         }
 
-        // Command để chuyển đổi View
+        
+        private string _userInitials;
+        public string UserInitials
+        {
+            get => _userInitials;
+            set { _userInitials = value; OnPropertyChanged(); }
+        }
+
+        private string _userFullName;
+        public string UserFullName
+        {
+            get => _userFullName;
+            set { _userFullName = value; OnPropertyChanged(); }
+        }
+
+        
+        public Visibility DashboardVisibility =>
+            (App.CurrentUser?.Role == App.Roles.SaleStaff) ? Visibility.Collapsed : Visibility.Visible;
+
+        public Visibility AdminTabVisibility =>
+            (App.CurrentUser?.Role == App.Roles.SaleStaff) ? Visibility.Collapsed : Visibility.Visible;
+
         public ICommand NavigateCommand { get; }
 
         public PageModel()
         {
-            // Khởi tạo HomeVM làm View mặc định khi ứng dụng mở
-            CurrentViewModel = new HomeViewModel();
-
-            // Khởi tạo Command
             NavigateCommand = new RelayCommand(ExecuteNavigate);
+
+          
+            LoadUserInfo();
+
+           
+            if (App.CurrentUser != null && App.CurrentUser.Role == App.Roles.SaleStaff)
+            {
+                CurrentViewModel = new PosViewModel();
+            }
+            else
+            {
+                CurrentViewModel = new HomeViewModel();
+            }
         }
 
-        // Logic chuyển đổi ViewModel
+       
+        private void LoadUserInfo()
+        {
+            if (App.CurrentUser != null)
+            {
+                UserFullName = App.CurrentUser.Name; 
+                UserInitials = GetInitials(App.CurrentUser.Name);
+            }
+            else
+            {
+                UserInitials = "G";
+                UserFullName = "Guest";
+            }
+        }
+
+        private string GetInitials(string fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName)) return "AD";
+
+            
+            var parts = fullName.Split(new char[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 1)
+                return parts[0].Substring(0, 1).ToUpper(); 
+
+            if (parts.Length >= 2)
+            {
+                
+                var first = parts[0].Substring(0, 1);
+                var last = parts[parts.Length - 1].Substring(0, 1);
+                return (first + last).ToUpper();
+            }
+
+            return "AD";
+        }
+
+       
         private void ExecuteNavigate(object parameter)
         {
             string viewName = parameter as string;
-
             if (viewName == null) return;
 
-            // Kiểm tra và tạo ViewModel tương ứng
+            
+            if (App.CurrentUser?.Role == App.Roles.SaleStaff)
+            {
+                if (viewName == "Home" || viewName == "RevenueStatistics" || viewName == "Inventory" || viewName == "Admin")
+                {
+                    MessageBox.Show("Bạn không có quyền truy cập chức năng này!", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            }
+
             switch (viewName)
             {
                 case "Home":
@@ -62,12 +134,7 @@ namespace QUAN_LY.ViewModel
                 case "Admin":
                     CurrentViewModel = new AdminViewModel();
                     break;
-                default:
-                    // Có thể thêm ViewModel cho Logout (nếu cần) hoặc chỉ đơn giản là thoát
-                    break;
             }
         }
     }
-
-   
 }

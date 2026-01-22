@@ -224,6 +224,22 @@ namespace QUAN_LY.ViewModel
         {
             if (SelectedAdmin == null) return;
 
+           
+            if (SelectedAdmin.Username == App.CurrentUser.Username)
+            {
+                await _dialogService.ShowErrorAsync("Lỗi", "Bạn không thể xóa tài khoản đang đăng nhập!");
+                return;
+            }
+
+           
+            if (App.CurrentUser.Role == App.Roles.Manager && SelectedAdmin.Role == App.Roles.SuperAdmin)
+            {
+                await _dialogService.ShowErrorAsync("Không đủ quyền", "Manager không được phép xóa Super Admin!");
+                return;
+            }
+
+          
+
             var confirm = await _dialogService.ShowConfirmationAsync(
                 "Xác nhận xóa",
                 $"Bạn có chắc chắn muốn xóa nhân viên '{SelectedAdmin.Name}'?\nHành động này không thể hoàn tác."
@@ -243,6 +259,7 @@ namespace QUAN_LY.ViewModel
                 }
                 else
                 {
+                    
                     await _dialogService.ShowErrorAsync("Lỗi", result.Message);
                 }
             }

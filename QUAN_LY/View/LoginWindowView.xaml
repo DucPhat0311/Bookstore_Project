@@ -16,7 +16,6 @@
 
     <Border Background="#eff2f7" CornerRadius="30">
         <Grid>
-            <!-- Background Ellipses -->
             <Ellipse Width="500" Height="500" VerticalAlignment="Bottom"  
                      Fill="#80c0f6" Margin="50,0,0,-200" Opacity="0.6"/>
             <Ellipse Width="300" Height="300" VerticalAlignment="Bottom"  
@@ -28,10 +27,8 @@
             <Ellipse Width="400" Height="400" VerticalAlignment="Bottom"  
                      Fill="#87c5f6" Margin="280,0,0,-70" Opacity="0.8"/>
 
-            <!-- Left Side: Form -->
             <Grid Width="540" HorizontalAlignment="Left" Margin="50,0,0,0">
                 <StackPanel VerticalAlignment="Center" Width="400">
-                    <!-- Title -->
                     <TextBlock Text="Welcome" 
                                FontSize="36" 
                                FontWeight="Bold" 
@@ -49,13 +46,13 @@
                                Foreground="#623ed0"
                                Margin="0,0,0,40"/>
 
-                    <!-- Username -->
                     <TextBlock Text="UserName" 
                                Foreground="#666" 
                                FontSize="14"
                                Margin="0,0,0,5"/>
 
                     <TextBox x:Name="txtUsername" 
+                             Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
                              Height="45" 
                              FontSize="14"
                              Padding="15,10"
@@ -69,13 +66,13 @@
                         </TextBox.Resources>
                     </TextBox>
 
-                    <!-- Password -->
                     <TextBlock Text="Password" 
                                Foreground="#666" 
                                FontSize="14"
                                Margin="0,15,0,5"/>
 
                     <PasswordBox x:Name="txtPassword" 
+                                 KeyDown="txtPassword_KeyDown"
                                  Height="45"
                                  FontSize="14"
                                  Padding="15,10"
@@ -89,17 +86,28 @@
                         </PasswordBox.Resources>
                     </PasswordBox>
 
-                    
 
-                    <!-- Error Message -->
                     <TextBlock x:Name="txtError" 
+                               Text="{Binding ErrorMessage}"
                                Foreground="Red" 
                                FontSize="12"
                                Margin="0,10,0,0"
-                               TextWrapping="Wrap"
-                               Visibility="Collapsed"/>
+                               TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
 
-                    <!-- Login Button -->
                     <Button x:Name="btnLogin" 
                             Content="Sign in"
                             Height="50" 
@@ -118,7 +126,6 @@
                         </Button.Resources>
                     </Button>
 
-                    <!-- Demo Account -->
                     <StackPanel Margin="0,20,0,0">
                         <TextBlock Text="Tài khoản demo:" 
                                    Foreground="#888" 
@@ -126,14 +133,13 @@
                         <TextBlock Text="Username: admin" 
                                    Foreground="#888" 
                                    FontSize="11"/>
-                        <TextBlock Text="Password: admin123" 
+                        <TextBlock Text="Password: 123456" 
                                    Foreground="#888" 
                                    FontSize="11"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>
 
-            <!-- Right Side: Decorative/Info -->
             <Grid Width="540" HorizontalAlignment="Right" Margin="0,0,50,0">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock Text="QUẢN LÝ SÁCH" 
@@ -148,7 +154,6 @@
                                TextAlignment="Center"
                                Margin="0,0,0,40"/>
 
-                    <!-- Features List -->
                     <StackPanel Margin="0,0,0,40">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                             <TextBlock Text="✓" Foreground="#623ed0" FontSize="16" Margin="0,0,10,0"/>
@@ -164,11 +169,10 @@
                         </StackPanel>
                     </StackPanel>
 
-                    
+
                 </StackPanel>
             </Grid>
 
-            <!-- Close Button -->
             <Button x:Name="btnClose" 
                     Content="X" 
                     Width="30" Height="30"
@@ -178,7 +182,7 @@
                     Background="Transparent"
                     Foreground="#666"
                     FontWeight="Bold"
-                    BorderThickness="0"
+                    BorderThickness="0" 
                     Click="BtnClose_Click"
                     Cursor="Hand"/>
         </Grid>
