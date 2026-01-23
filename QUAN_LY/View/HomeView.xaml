@@ -26,8 +26,8 @@
                 <StackPanel VerticalAlignment="Center" Margin="20">
                     <TextBlock Text="DOANH THU HÔM NAY" Foreground="#7f8c8d" FontWeight="SemiBold" FontSize="12"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <TextBlock Text="💰" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="txtDoanhThu" Text="0 đ" Foreground="#27ae60" FontWeight="Bold" FontSize="24"/>
+                        <TextBlock Text="{Binding TodayRevenue}" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtDoanhThu" Foreground="#27ae60" FontWeight="Bold" FontSize="24"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -35,8 +35,8 @@
                 <StackPanel VerticalAlignment="Center" Margin="20">
                     <TextBlock Text="ĐƠN HÀNG HÔM NAY" Foreground="#7f8c8d" FontWeight="SemiBold" FontSize="12"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <TextBlock Text="🧾" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="txtDonHang" Text="0" Foreground="#2980b9" FontWeight="Bold" FontSize="24"/>
+                        <TextBlock Text="{Binding TodayOrders}" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtDonHang" Foreground="#2980b9" FontWeight="Bold" FontSize="24"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -44,8 +44,8 @@
                 <StackPanel VerticalAlignment="Center" Margin="20">
                     <TextBlock Text="SÁCH ĐÃ BÁN" Foreground="#7f8c8d" FontWeight="SemiBold" FontSize="12"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <TextBlock Text="📚" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="txtSachBan" Text="0" Foreground="#8e44ad" FontWeight="Bold" FontSize="24"/>
+                        <TextBlock Text="{Binding TodayBooksSold}" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtSachBan" Foreground="#8e44ad" FontWeight="Bold" FontSize="24"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -53,8 +53,8 @@
                 <StackPanel VerticalAlignment="Center" Margin="20">
                     <TextBlock Text="SÁCH SẮP HẾT" Foreground="#7f8c8d" FontWeight="SemiBold" FontSize="12"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <TextBlock Text="⚠️" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="#c0392b"/>
-                        <TextBlock x:Name="txtCanhBao" Text="0" Foreground="#c0392b" FontWeight="Bold" FontSize="24"/>
+                        <TextBlock Text="{Binding LowStockCount}" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="#c0392b"/>
+                        <TextBlock x:Name="txtCanhBao" Foreground="#c0392b" FontWeight="Bold" FontSize="24"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
