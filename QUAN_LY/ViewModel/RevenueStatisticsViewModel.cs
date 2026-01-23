@@ -106,20 +106,9 @@ namespace QUAN_LY.ViewModel
                     .Where(ir => ir.Status == 1)
                     .Sum(ir => ir.TotalCost);
 
-                // Cập nhật: Tính TotalProfit = tổng doanh thu từ OrderItems - tổng chi phí nhập từ ImportDetail chỉ cho sách đã bán (giữ nguyên logic gốc, cập nhật từ DB)
-                // Tổng doanh thu = Sum(OrderItem.Quantity * Book.Price)
-                var totalRevenueFromBooks = _dbContext.OrderItems
-                    .Join(_dbContext.Books, oi => oi.BookId, b => b.Id, (oi, b) => oi.Quantity * b.Price)
-                    .Sum();
-
-                // Tổng chi phí nhập của sách đã bán = Sum(OrderItem.Quantity * ImportDetail.importPrice) từ nhập thành công, join qua BookId
-                var totalImportCost = _dbContext.OrderItems
-                    .Join(_dbContext.ImportDetails, oi => oi.BookId, id => id.BookId, (oi, id) => new { oi, id })
-                    .Join(_dbContext.ImportReceipts, temp => temp.id.importId, ir => ir.Id, (temp, ir) => new { temp.oi, temp.id, ir })
-                    .Where(x => x.ir.Status == 1)
-                    .Sum(x => x.oi.Quantity * x.id.importPrice);
-
-                TotalProfit = (totalRevenueFromBooks ?? 0) - (totalImportCost ?? 0);
+                // *** THAY ĐỔI: Đơn giản hóa TotalProfit = TotalRevenue - TotalCapital ***
+                // (Trước đây tính chi tiết lợi nhuận chỉ cho sách đã bán; giờ đơn giản hóa theo yêu cầu)
+                TotalProfit = TotalRevenue - TotalCapital;
 
                 // Biểu đồ – Thay đổi để hiển thị theo 7 ngày gần nhất, với đường cong màu (thay vì chỉ tổng)
                 var revenueData = new ChartValues<decimal>();
@@ -139,7 +128,7 @@ namespace QUAN_LY.ViewModel
                         .Sum(o => (decimal?)o.TotalAmount) ?? 0;
                     revenueData.Add(rev);
 
-                    // Tính lợi nhuận cho ngày từ DB (giữ logic gốc)
+                    // Tính lợi nhuận cho ngày từ DB (giữ logic gốc: doanh thu - chi phí nhập cho ngày)
                     var totalRevBooksDay = _dbContext.OrderItems
                         .Join(_dbContext.Orders, oi => oi.OrderId, o => o.Id, (oi, o) => new { oi, o })
                         .Where(x => x.o.Status == 1 && x.o.OrderDate >= dayStart && x.o.OrderDate <= dayEnd)
