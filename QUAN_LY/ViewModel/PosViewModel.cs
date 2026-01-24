@@ -245,7 +245,7 @@ namespace QUAN_LY.ViewModel
                     OrderDate = DateTime.Now,
                     TotalAmount = CartTotal,
                     Status = 1, // Đã thanh toán
-                    AdminId = 1 // ID nhân viên mặc định (cần sửa lại theo hệ thống đăng nhập của bạn)
+                    AdminId = App.CurrentUser != null ? App.CurrentUser.AdminId : 1 // Đã chỉnh lại được AdminId
                 };
 
                 _db.Orders.Add(order);
