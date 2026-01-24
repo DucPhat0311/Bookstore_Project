@@ -20,6 +20,8 @@ namespace QUAN_LY.ViewModel
         public ObservableCollection<Publisher> PublisherList { get; set; } = new();
         public ObservableCollection<Book> FilteredBookList { get; set; } = new();
         public ObservableCollection<ImportDetail> ImportItems { get; set; } = new();
+
+        // Thay đổi thành ObservableCollection<object> để chứa Anonymous Type có thông tin Admin
         public ObservableCollection<object> ImportHistory { get; set; } = new();
 
         private bool _isHistoryView = false;
@@ -40,7 +42,6 @@ namespace QUAN_LY.ViewModel
         private decimal _totalCost;
         public decimal TotalCost { get => _totalCost; set { _totalCost = value; OnPropertyChanged(); } }
 
-        // Bắt lỗi nhập liệu
         public string Error => null;
         public string this[string name]
         {
@@ -61,7 +62,7 @@ namespace QUAN_LY.ViewModel
         public InventoryViewModel()
         {
             LoadInitialData();
-            // khởi tạo phiếu nhập mới
+
             NewReceiptCommand = new RelayCommand<object>((p) => {
                 ImportItems.Clear();
                 SelectedBook = null;
@@ -69,12 +70,12 @@ namespace QUAN_LY.ViewModel
                 InputPrice = "0";
                 TotalCost = 0;
             });
-            // khởi tạo phiếu nhập mới
+
             ToggleHistoryCommand = new RelayCommand<object>((p) => {
                 IsHistoryView = !IsHistoryView;
                 if (IsHistoryView) LoadHistory();
             });
-            // thêm sách vào danh sách nhập
+
             AddItemCommand = new RelayCommand<object>((p) => {
                 ImportItems.Add(new ImportDetail
                 {
@@ -85,13 +86,15 @@ namespace QUAN_LY.ViewModel
                 });
                 TotalCost = ImportItems.Sum(x => x.quantity * x.importPrice);
             }, (p) => SelectedBook != null && string.IsNullOrEmpty(this[nameof(InputQty)]) && string.IsNullOrEmpty(this[nameof(InputPrice)]));
-            // lưu phiếu nhập vào DB
+
             SaveCommand = new RelayCommand<object>((p) => {
                 try
                 {
                     var receipt = new ImportReceipt
                     {
                         PublisherId = SelectedPublisher.Id,
+                        // Thêm AdminId từ User hiện tại của App (giống OrderViewModel)
+                        AdminId = App.CurrentUser?.AdminId,
                         ImportDate = DateTime.Now,
                         TotalCost = TotalCost
                     };
@@ -110,16 +113,14 @@ namespace QUAN_LY.ViewModel
                     NewReceiptCommand.Execute(null);
                 }
                 catch (Exception ex) { MessageBox.Show("Lỗi lưu DB: " + ex.Message); }
-            }, (p) => ImportItems.Count > 0);
+            }, (p) => ImportItems.Count > 0 && SelectedPublisher != null);
 
             ExportHistoryExcelCommand = new RelayCommand<object>((p) => ExportHistoryToExcel(), (p) => IsHistoryView && ImportHistory.Count > 0);
         }
 
         private void ExportHistoryToExcel()
         {
-            // sử dụng api EPPlus xuất file Excel
             OfficeOpenXml.ExcelPackage.License.SetNonCommercialOrganization("QUAN_LY");
-
             SaveFileDialog sfd = new SaveFileDialog()
             {
                 Filter = "Excel Files (*.xlsx)|*.xlsx",
@@ -133,13 +134,10 @@ namespace QUAN_LY.ViewModel
                     using (var pck = new OfficeOpenXml.ExcelPackage())
                     {
                         var ws = pck.Workbook.Worksheets.Add("Lịch Sử Nhập Kho");
-
-                        // Header
-                        // Thiết lập tiêu đề cột
-                        string[] headers = { "Ngày Nhập", "Tên Sách", "Số Lượng", "Đơn Giá", "Thành Tiền" };
+                        // Thêm cột Người thực hiện vào header Excel
+                        string[] headers = { "Ngày Nhập", "Người Thực Hiện", "Tên Sách", "Số Lượng", "Đơn Giá", "Thành Tiền" };
                         for (int i = 0; i < headers.Length; i++)
                         {
-                            // Tạo ô và định dạng
                             var cell = ws.Cells[1, i + 1];
                             cell.Value = headers[i];
                             cell.Style.Font.Bold = true;
@@ -148,22 +146,18 @@ namespace QUAN_LY.ViewModel
                             cell.Style.Font.Color.SetColor(System.Drawing.Color.White);
                         }
 
-                        // Dữ liệu
                         int row = 2;
-                        // Duyệt từng item trong ImportHistory
                         foreach (dynamic item in ImportHistory)
                         {
-                            // Gán giá trị vào từng cột
                             ws.Cells[row, 1].Value = item.ImportDate?.ToString("dd/MM/yyyy HH:mm");
-                            ws.Cells[row, 2].Value = item.Title;
-                            ws.Cells[row, 3].Value = item.quantity;
-                            ws.Cells[row, 4].Value = item.importPrice;
-                            ws.Cells[row, 5].Value = (decimal)(item.quantity ?? 0) * (decimal)(item.importPrice ?? 0);
-
-                            ws.Cells[row, 4, row, 5].Style.Numberformat.Format = "#,##0";
+                            ws.Cells[row, 2].Value = item.StaffName; // Lấy tên Admin
+                            ws.Cells[row, 3].Value = item.Title;
+                            ws.Cells[row, 4].Value = item.quantity;
+                            ws.Cells[row, 5].Value = item.importPrice;
+                            ws.Cells[row, 6].Value = (decimal)(item.quantity ?? 0) * (decimal)(item.importPrice ?? 0);
+                            ws.Cells[row, 5, row, 6].Style.Numberformat.Format = "#,##0";
                             row++;
                         }
-                        // định dạng cột
                         ws.Cells.AutoFitColumns();
                         File.WriteAllBytes(sfd.FileName, pck.GetAsByteArray());
                         MessageBox.Show("Xuất file Excel thành công!");
@@ -172,7 +166,7 @@ namespace QUAN_LY.ViewModel
                 catch (Exception ex) { MessageBox.Show("Lỗi: " + ex.Message); }
             }
         }
-        // lọc sách theo nhà xuất bản được chọn
+
         private void FilterBooks()
         {
             FilteredBookList.Clear();
@@ -180,17 +174,30 @@ namespace QUAN_LY.ViewModel
             var list = _db.Books.Where(x => x.PublisherId == SelectedPublisher.Id).ToList();
             foreach (var b in list) FilteredBookList.Add(b);
         }
-        // tải lịch sử nhập kho từ DB
+
+        // Cập nhật LoadHistory để Join với bảng Admin giống OrderViewModel
         private void LoadHistory()
         {
             ImportHistory.Clear();
             var data = (from d in _db.ImportDetails
                         join r in _db.ImportReceipts on d.importId equals r.Id
                         join b in _db.Books on d.BookId equals b.Id
-                        select new { r.ImportDate, b.Title, d.quantity, d.importPrice }).OrderByDescending(x => x.ImportDate).ToList();
+                        join a in _db.Admins on r.AdminId equals a.AdminId into adminJoin
+                        from a in adminJoin.DefaultIfEmpty()
+                        select new
+                        {
+                            r.ImportDate,
+                            Title = b.Title,
+                            quantity = d.quantity,
+                            importPrice = d.importPrice,
+                            StaffName = a != null ? a.Name : "Hệ thống" // Lấy tên nhân viên
+                        })
+                        .OrderByDescending(x => x.ImportDate)
+                        .ToList<object>();
+
             foreach (var i in data) ImportHistory.Add(i);
         }
-        // tải dữ liệu ban đầu
+
         private void LoadInitialData()
         {
             try
