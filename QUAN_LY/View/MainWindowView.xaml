@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:vm="clr-namespace:QUAN_LY.ViewModel"
+        xmlns:utils="clr-namespace:QUAN_LY.Utilities"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         mc:Ignorable="d"
         
@@ -24,6 +25,56 @@
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <utils:MenuSelectionConverter x:Key="MenuSelectionConverter"/>
+
+        <Style x:Key="menuButtonIcon" TargetType="Icon:PackIconMaterial">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0 0 15 0"/>
+            <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+        </Style>
+
+        <Style x:Key="menuButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="20 0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="10" Margin="10 2">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left" Margin="15 0"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#7e5fdc"/>
+                </Trigger>
+
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource MenuSelectionConverter}">
+                            <Binding Path="DataContext.SelectedView" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                            <Binding Path="CommandParameter" RelativeSource="{RelativeSource Self}"/>
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="Foreground" Value="#623ed0"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
         <Style x:Key="WinBtnStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
@@ -65,35 +116,35 @@
         </Grid.ColumnDefinitions>
 
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Button HorizontalAlignment="Left" Margin="20 28 0 35" Style="{StaticResource topButton}" 
-                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                <Icon:PackIconMaterial Kind="Menu" Width="15" Height="15"/>
-            </Button>
-
-            <Border Grid.Row="1" Background="#623ed0" CornerRadius="0 50 0 0">
+            <Border Background="#623ed0" CornerRadius="0 50 0 0">
                 <DockPanel>
+
+                    <Button DockPanel.Dock="Top" 
+                    HorizontalAlignment="Left" 
+                    Margin="20 20 0 10" 
+                    Style="{StaticResource topButton}" 
+                    Foreground="White"
+                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Icon:PackIconMaterial Kind="Menu" Width="15" Height="15" Foreground="White"/>
+                    </Button>
+
                     <Border Width="80" Height="80" Padding="3" Background="White" CornerRadius="100"
-                            DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="20 -30 0 0">
+                    DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="0 10 0 0">
                         <Grid>
                             <Ellipse>
                                 <Ellipse.Fill>
-                                    <SolidColorBrush Color="#FF623ED0"/>
+                                    <SolidColorBrush Color="Orange"/>
                                 </Ellipse.Fill>
                             </Ellipse>
                             <TextBlock Text="{Binding UserInitials}" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                       Foreground="White" FontSize="28" FontWeight="Bold"/>
+                               Foreground="White" FontSize="28" FontWeight="Bold"/>
                         </Grid>
                     </Border>
 
                     <TextBlock Text="{Binding UserFullName}" Foreground="White" FontSize="16" FontWeight="SemiBold"
-                               DockPanel.Dock="Top" TextAlignment="Center" Margin="5 25 0 10" TextWrapping="Wrap"/>
+                       DockPanel.Dock="Top" TextAlignment="Center" Margin="5 15 0 10" TextWrapping="Wrap"/>
 
-                    <Separator Margin="25" DockPanel.Dock="Top" Height="0.8" Background="#7e5fdc"/>
+                    <Separator Margin="25 10 25 25" DockPanel.Dock="Top" Height="0.8" Background="#7e5fdc"/>
 
                     <StackPanel DockPanel.Dock="Top" shell:WindowChrome.IsHitTestVisibleInChrome="True">
                         <Button Style="{StaticResource menuButton}" Command="{Binding NavigateCommand}" CommandParameter="Home" Visibility="{Binding DashboardVisibility}">
@@ -102,6 +153,7 @@
                                 <TextBlock Text="Home"/>
                             </StackPanel>
                         </Button>
+
                         <Button Style="{StaticResource menuButton}" Command="{Binding NavigateCommand}" CommandParameter="SellBook">
                             <StackPanel Orientation="Horizontal">
                                 <Icon:PackIconMaterial Kind="Shopping" Style="{StaticResource menuButtonIcon}"/>
@@ -145,7 +197,7 @@
                         </Button>
                     </StackPanel>
 
-                    <Button Style="{StaticResource menuButton}" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" Margin="15,0" Click="LogoutButton_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button Style="{StaticResource menuButton}" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" Margin="15,0,15,20" Click="LogoutButton_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True">
                         <StackPanel Orientation="Horizontal">
                             <Icon:PackIconMaterial Kind="Logout" Style="{StaticResource menuButtonIcon}"/>
                             <TextBlock Text="Logout"/>

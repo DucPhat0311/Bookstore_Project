@@ -7,7 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows; 
+using System.Windows;
 
 namespace QUAN_LY.ViewModel
 {
@@ -15,7 +15,7 @@ namespace QUAN_LY.ViewModel
     {
         private readonly BookServiceSQL _bookService;
 
-        private CancellationTokenSource _cancellationTokenSource;
+        private List<Book> _cachedBooks;
 
         private ObservableCollection<Book> _bookList;
         public ObservableCollection<Book> BookList
@@ -32,7 +32,7 @@ namespace QUAN_LY.ViewModel
             {
                 _searchText = value;
                 OnPropertyChanged();
-                OnSearchTextChanged();
+                SearchInRam();
             }
         }
 
@@ -75,7 +75,43 @@ namespace QUAN_LY.ViewModel
             BookList = new ObservableCollection<Book>();
 
             LoadDashboardStats();
+            LoadAllBooksToRam(); 
         }
+
+        public async void LoadAllBooksToRam()
+        {
+            try
+            {
+                var books = await _bookService.GetAllBooksAsync();
+
+                _cachedBooks = books;
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải dữ liệu sách: " + ex.Message);
+            }
+           
+        }
+
+        private void SearchInRam()
+        {
+            if (string.IsNullOrWhiteSpace(_searchText))
+            {
+                BookList.Clear();
+                return;
+            }
+
+            string keyword = _searchText.ToLower();
+
+            var result = _cachedBooks.Where(b =>
+                (b.Title != null && b.Title.ToLower().Contains(keyword)) ||
+                (b.Author != null && b.Author.Name.ToLower().Contains(keyword))
+            ).ToList();
+
+            BookList = new ObservableCollection<Book>(result);
+        }
+
 
         public async void LoadDashboardStats()
         {
@@ -94,36 +130,6 @@ namespace QUAN_LY.ViewModel
             }
         }
 
-        private async void OnSearchTextChanged()
-        {
-            if (string.IsNullOrWhiteSpace(_searchText))
-            {
-                BookList.Clear();
-                return;
-            }
-
-            if (_cancellationTokenSource != null)
-            {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
-            }
-
-            _cancellationTokenSource = new CancellationTokenSource();
-            var token = _cancellationTokenSource.Token;
-
-            try
-            {
-                await Task.Delay(500, token);
-                var result = await _bookService.SearchBooksAsync(_searchText, token);
-                BookList = new ObservableCollection<Book>(result);
-            }
-            catch (TaskCanceledException)
-            {
-            }
-            catch (Exception ex)
-            {
-            }
-        }
     }
+
 }

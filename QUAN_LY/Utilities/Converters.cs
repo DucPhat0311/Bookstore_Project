@@ -87,4 +87,28 @@ namespace QUAN_LY.Utilities
             throw new NotImplementedException();
         }
     }
+
+    public class MenuSelectionConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            // values[0]: SelectedView (lấy từ ViewModel)
+            // values[1]: CommandParameter (lấy từ nút bấm, ví dụ "Home")
+
+            if (values.Length >= 2 && values[0] != null && values[1] != null)
+            {
+                string selectedView = values[0].ToString();
+                string buttonParameter = values[1].ToString();
+
+                // So sánh xem tên View có trùng tên Nút không (không phân biệt hoa thường)
+                return selectedView.Equals(buttonParameter, StringComparison.OrdinalIgnoreCase);
+            }
+            return false;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

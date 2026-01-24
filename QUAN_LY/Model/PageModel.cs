@@ -9,7 +9,14 @@ namespace QUAN_LY.ViewModel
 {
     public class PageModel : BaseViewModel
     {
-       
+
+        private string _selectedView = "Home"; // Mặc định là Home
+        public string SelectedView
+        {
+            get => _selectedView;
+            set { _selectedView = value; OnPropertyChanged(); }
+        }
+
         private object _currentViewModel;
         public object CurrentViewModel
         {
@@ -52,10 +59,12 @@ namespace QUAN_LY.ViewModel
             if (App.CurrentUser != null && App.CurrentUser.Role == App.Roles.SaleStaff)
             {
                 CurrentViewModel = new PosViewModel();
+                SelectedView = "SellBook";
             }
             else
             {
                 CurrentViewModel = new HomeViewModel();
+                SelectedView = "Home";
             }
         }
 
@@ -110,6 +119,8 @@ namespace QUAN_LY.ViewModel
                     return;
                 }
             }
+
+            SelectedView = viewName;
 
             switch (viewName)
             {
