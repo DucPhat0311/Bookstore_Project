@@ -19,9 +19,15 @@ namespace QUAN_LY.Interfaces
         Book GetBookById(int id);
         List<Book> GetAllBooksForManagement(); // tiêu chí lấy tất cả sách của method ở trang quản lý sách khác với method ở POS (trang bán hàng)
         Task<List<Book>> GetAllBooksAsync();
-        Task<List<Book>> SearchBooksAsync(string keyword, CancellationToken token);
 
         Task<DashboardStats> GetDashboardStatsAsync();
+
+        public int GetOrCreateAuthor(string name);
+
+        public int GetOrCreatePublisher(string name);
+
+        public int GetOrCreateSubject(string name);
+
 
         List<Book> GetAllBooksForPOS(); // method này chỉ lấy sách chưa xóa và số lượng lớn hơn 0 khác với cái trên
         List<Book> SearchBooksForPOS(string keyword); // hàm tìm kiếm sách cho trang POS

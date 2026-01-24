@@ -115,21 +115,6 @@ namespace QUAN_LY.Services
             }
         }
 
-        public async Task<List<Book>> SearchBooksAsync(string keyword, CancellationToken token)
-        {
-            using (var context = new BookStoreDbContext())
-            {
-                var query = context.Books.AsNoTracking().Include(b => b.Author).AsQueryable();
-
-                if (!string.IsNullOrWhiteSpace(keyword))
-                {
-                    query = query.Where(b => b.Title.Contains(keyword));
-                }
-
-                return await query.Take(10).ToListAsync(token);
-            }
-        }
-
         public async Task<DashboardStats> GetDashboardStatsAsync()
         {
             using (var context = new BookStoreDbContext())
@@ -161,6 +146,53 @@ namespace QUAN_LY.Services
                     .CountAsync(x => x.Quantity < 10 && !x.IsDeleted);
 
                 return stats;
+            }
+        }
+
+        public int GetOrCreateAuthor(string name)
+        {
+            using (var context = new BookStoreDbContext()) 
+            {
+                name = name.Trim();
+                // tìm xem có chưa
+                var exist = context.Authors.FirstOrDefault(x => x.Name == name);
+                if (exist != null) return exist.Id;
+
+                // chưa có thì tạo mới
+                var newItem = new Author() { Name = name };
+                context.Authors.Add(newItem);
+                context.SaveChanges();
+                return newItem.Id;
+            }
+        }
+
+        public int GetOrCreatePublisher(string name)
+        {
+            using (var context = new BookStoreDbContext())
+            {
+                name = name.Trim();
+                var exist = context.Publishers.FirstOrDefault(x => x.Name == name);
+                if (exist != null) return exist.Id;
+
+                var newItem = new Publisher() { Name = name, Phone = "Chưa cập nhật", Address = "Chưa cập nhật" , IsActive = true };
+                context.Publishers.Add(newItem);
+                context.SaveChanges();
+                return newItem.Id;
+            }
+        }
+
+        public int GetOrCreateSubject(string name)
+        {
+            using (var context = new BookStoreDbContext())
+            {
+                name = name.Trim();
+                var exist = context.Subjects.FirstOrDefault(x => x.Name == name);
+                if (exist != null) return exist.Id;
+
+                var newItem = new Subject() { Name = name };
+                context.Subjects.Add(newItem);
+                context.SaveChanges();
+                return newItem.Id;
             }
         }
 

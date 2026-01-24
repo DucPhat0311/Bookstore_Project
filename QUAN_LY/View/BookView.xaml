@@ -66,9 +66,9 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox Grid.Column="0" ItemsSource="{Binding SubjectList}" SelectedItem="{Binding SelectedFilterSubject}" DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Lọc theo Thể loại" Style="{DynamicResource MaterialDesignOutlinedComboBox}" Margin="0,0,8,0"/>
-                        <ComboBox Grid.Column="1" ItemsSource="{Binding AuthorList}" SelectedItem="{Binding SelectedFilterAuthor}" DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Lọc theo Tác giả" Style="{DynamicResource MaterialDesignOutlinedComboBox}" Margin="0,0,8,0"/>
-                        <ComboBox Grid.Column="2" ItemsSource="{Binding PublisherList}" SelectedItem="{Binding SelectedFilterPublisher}" DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Lọc theo NXB" Style="{DynamicResource MaterialDesignOutlinedComboBox}" Margin="0,0,8,0"/>
+                        <ComboBox Grid.Column="0" ItemsSource="{Binding SubjectList}" IsEditable="True" SelectedItem="{Binding SelectedFilterSubject}" DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Lọc theo Thể loại" Style="{DynamicResource MaterialDesignOutlinedComboBox}" Margin="0,0,8,0"/>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding AuthorList}" IsEditable="True" SelectedItem="{Binding SelectedFilterAuthor}" DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Lọc theo Tác giả" Style="{DynamicResource MaterialDesignOutlinedComboBox}" Margin="0,0,8,0"/>
+                        <ComboBox Grid.Column="2" ItemsSource="{Binding PublisherList}"  IsEditable="True" SelectedItem="{Binding SelectedFilterPublisher}" DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Lọc theo NXB" Style="{DynamicResource MaterialDesignOutlinedComboBox}" Margin="0,0,8,0"/>
                         <Button Grid.Column="3" Command="{Binding ClearFilterCommand}" Style="{DynamicResource MaterialDesignOutlinedButton}" BorderBrush="OrangeRed" Foreground="OrangeRed" ToolTip="Xóa hết điều kiện lọc">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="FilterOff" Margin="0,0,5,0"/>
@@ -183,7 +183,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Tác giả" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
-                                <ComboBox ItemsSource="{Binding AuthorList}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding SelectedBook.AuthorId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" materialDesign:HintAssist.Hint="Chọn Tác giả" Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
+                                <ComboBox ItemsSource="{Binding AuthorList}" IsEditable="True" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding SelectedBook.AuthorId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" materialDesign:HintAssist.Hint="Chọn Tác giả" Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
                             </StackPanel>
                         </Grid>
 
@@ -193,7 +193,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,0,0">
                                 <TextBlock Text="Thể loại" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
-                                <ComboBox ItemsSource="{Binding SubjectList}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding SelectedBook.SubjectId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" materialDesign:HintAssist.Hint="Chọn Thể loại" Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
+                                <ComboBox ItemsSource="{Binding SubjectList}" IsEditable="True" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding SelectedBook.SubjectId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" materialDesign:HintAssist.Hint="Chọn Thể loại" Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
                             </StackPanel>
                         </Grid>
 
@@ -203,7 +203,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,0,0">
                                 <TextBlock Text="Nhà xuất bản" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Margin="0,0,0,4"/>
-                                <ComboBox ItemsSource="{Binding PublisherList}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding SelectedBook.PublisherId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" materialDesign:HintAssist.Hint="Chọn NXB" Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
+                                <ComboBox ItemsSource="{Binding PublisherList}" IsEditable="True" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding SelectedBook.PublisherId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" materialDesign:HintAssist.Hint="Chọn NXB" Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
                             </StackPanel>
                         </Grid>
 

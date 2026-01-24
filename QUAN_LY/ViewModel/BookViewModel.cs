@@ -308,12 +308,47 @@ namespace QUAN_LY.ViewModel
                 SelectedBook.Title = info.Title;
 
                 // Điền Ảnh 
-                SelectedBook.ImageUrl = info.ImageLinks?.Thumbnail;            
+                SelectedBook.ImageUrl = info.ImageLinks?.Thumbnail;
 
-                // Cập nhật giao diện 
+                // Xử lý Tác giả 
+                string authorName = "Chưa cập nhật"; 
+                if (info.Authors != null && info.Authors.Count > 0)
+                {
+                    authorName = info.Authors[0]; 
+                }
+
+                int authorId = _bookService.GetOrCreateAuthor(authorName);
+                SelectedBook.AuthorId = authorId;
+                AuthorList = _bookService.GetAllAuthors(); 
+
+
+                // Xử lý Nhà xuất bản 
+                string pubName = "Chưa cập nhật"; 
+                if (!string.IsNullOrEmpty(info.Publisher))
+                {
+                    pubName = info.Publisher; 
+                }
+
+                int pubId = _bookService.GetOrCreatePublisher(pubName);
+                SelectedBook.PublisherId = pubId;
+                PublisherList = _bookService.GetAllPublishers();
+
+
+                // Xử lý Thể loại 
+                string subjectName = "Chưa cập nhật"; 
+                if (info.Categories != null && info.Categories.Count > 0)
+                {
+                    subjectName = info.Categories[0]; 
+                }
+
+                int subId = _bookService.GetOrCreateSubject(subjectName);
+                SelectedBook.SubjectId = subId;
+                SubjectList = _bookService.GetAllSubjects();
+
                 OnPropertyChanged(nameof(SelectedBook));
                 MessageBox.Show("Đã lấy dữ liệu thành công!", "Google Books API");
             }
+
             else
             {
                 MessageBox.Show("Không tìm thấy sách với mã ISBN này.", "Lỗi");

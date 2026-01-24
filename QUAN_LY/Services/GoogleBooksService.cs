@@ -11,6 +11,10 @@ namespace QUAN_LY_APP.Services
     public class GoogleVolume
     {
         public string Title { get; set; }
+        public List<string> Authors { get; set; }
+        public string Publisher { get; set; }
+        public List<string> Categories { get; set; }
+
         public GoogleImage ImageLinks { get; set; }
     }
     public class GoogleImage { public string Thumbnail { get; set; } }
