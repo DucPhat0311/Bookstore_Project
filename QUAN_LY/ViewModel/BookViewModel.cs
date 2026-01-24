@@ -42,6 +42,16 @@ namespace QUAN_LY.ViewModel
             }
         }
 
+        private int _totalPages;
+        public int TotalPages
+        {
+            get => _totalPages;
+            set { _totalPages = value; OnPropertyChanged(); }
+        }
+
+        // Thêm chuỗi hiển thị cho đẹp (VD: "Trang 1 / 5")
+        public string PageInfo => $"Trang {CurrentPage} / {TotalPages}";
+
         private ObservableCollection<Book> _displayItems;
         public ObservableCollection<Book> DisplayItems
         {
@@ -175,12 +185,12 @@ namespace QUAN_LY.ViewModel
 
             NextPageCommand = new RelayCommand(
                 _ => { CurrentPage++; UpdatePagination(); },
-                _ => CanNext()
+                _ => CurrentPage < TotalPages // chỉ next được khi chưa phải trang cuối
             );
 
             PreviousPageCommand = new RelayCommand(
                 _ => { CurrentPage--; UpdatePagination(); },
-                _ => CurrentPage > 1
+                _ => CurrentPage > 1 // previous được khi lớn hơn trang 1
             );
 
             SearchCommand = new RelayCommand(_ => ApplyFilters());
@@ -392,6 +402,15 @@ namespace QUAN_LY.ViewModel
         {
             if (_filteredList == null) return;
 
+            TotalPages = (int)Math.Ceiling((double)_filteredList.Count / _itemsPerPage);
+
+            if (TotalPages == 0) TotalPages = 1;
+
+            if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+            if (CurrentPage < 1) CurrentPage = 1;
+
+            OnPropertyChanged(nameof(PageInfo));
+
             DisplayItems.Clear();
 
             var items = _filteredList.Skip((CurrentPage - 1) * _itemsPerPage).Take(_itemsPerPage).ToList();
@@ -400,6 +419,8 @@ namespace QUAN_LY.ViewModel
             {
                 DisplayItems.Add(item);
             }
+            (NextPageCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (PreviousPageCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
         bool CanNext()

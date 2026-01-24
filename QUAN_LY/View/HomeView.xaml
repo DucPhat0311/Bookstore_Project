@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:QUAN_LY.View"
-             
+                          xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+
              xmlns:utils="clr-namespace:QUAN_LY.Utilities"
              
              mc:Ignorable="d" 
@@ -100,25 +101,23 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Text="KẾT QUẢ TRA CỨU" FontWeight="Bold" FontSize="16" Margin="10,5,0,15" Foreground="#34495e"/>
 
-                <DataGrid x:Name="dgBookSearch" Grid.Row="2" 
-          ItemsSource="{Binding BookList}" 
-          AutoGenerateColumns="False" 
-          CanUserAddRows="False"
-          
-          RowHeight="120"  
-          
-          BorderThickness="0" 
-          IsReadOnly="True"
-          GridLinesVisibility="Horizontal"
-          HorizontalGridLinesBrush="#EEEEEE"
-          VerticalContentAlignment="Center"
-          HorizontalContentAlignment="Center">
+                <DataGrid x:Name="dgBookSearch" Grid.Row="1" 
+                          ItemsSource="{Binding BookList}" 
+                          AutoGenerateColumns="False" 
+                          CanUserAddRows="False"
+                          RowHeight="120"  
+                          BorderThickness="0" 
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#EEEEEE"
+                          VerticalContentAlignment="Center"
+                          HorizontalContentAlignment="Center">
 
                     <DataGrid.Resources>
                         <Style x:Key="TextColumnStyle" TargetType="TextBlock">
@@ -140,40 +139,16 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border CornerRadius="8" ClipToBounds="True" Margin="10" Background="#F0F0F0">
-                                        <Image Source="{Binding FullImageSource, IsAsync=True}" 
-                               Stretch="UniformToFill" 
-                               Height="100" Width="100"
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Center"/>
+                                        <Image Source="{Binding FullImageSource, IsAsync=True}" Stretch="UniformToFill" Height="100" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="TÊN SÁCH" 
-                            Binding="{Binding Title}" 
-                            Width="*" 
-                            FontWeight="SemiBold"
-                            ElementStyle="{StaticResource TextColumnStyle}"/>
-
-                        <DataGridTextColumn Header="TÁC GIẢ" 
-                            Binding="{Binding AuthorName}" 
-                            Width="150"
-                            ElementStyle="{StaticResource TextColumnStyle}"/>
-
-                        <DataGridTextColumn Header="GIÁ BÁN" 
-                            Binding="{Binding Price, StringFormat={}{0:N0} đ}" 
-                            Width="120" 
-                            FontWeight="Bold" 
-                            Foreground="#27ae60"
-                            ElementStyle="{StaticResource CenterColumnStyle}"/>
-
-                        <DataGridTextColumn Header="TỒN KHO" 
-                            Binding="{Binding Quantity}" 
-                            Width="100" 
-                            FontWeight="Bold" 
-                            Foreground="#c0392b"
-                            ElementStyle="{StaticResource CenterColumnStyle}"/>
+                        <DataGridTextColumn Header="TÊN SÁCH" Binding="{Binding Title}" Width="*" FontWeight="SemiBold" ElementStyle="{StaticResource TextColumnStyle}"/>
+                        <DataGridTextColumn Header="TÁC GIẢ" Binding="{Binding AuthorName}" Width="150" ElementStyle="{StaticResource TextColumnStyle}"/>
+                        <DataGridTextColumn Header="GIÁ BÁN" Binding="{Binding Price, StringFormat={}{0:N0} đ}" Width="120" FontWeight="Bold" Foreground="#27ae60" ElementStyle="{StaticResource CenterColumnStyle}"/>
+                        <DataGridTextColumn Header="TỒN KHO" Binding="{Binding Quantity}" Width="100" FontWeight="Bold" Foreground="#c0392b" ElementStyle="{StaticResource CenterColumnStyle}"/>
 
                         <DataGridTextColumn Header="TRẠNG THÁI" Binding="{Binding StatusText}" Width="130">
                             <DataGridTextColumn.ElementStyle>
@@ -181,7 +156,6 @@
                                     <Setter Property="VerticalAlignment" Value="Center"/>
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
                                     <Setter Property="Padding" Value="5"/>
-
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding StatusText}" Value="Hết hàng">
                                             <Setter Property="Foreground" Value="Red"/>
@@ -199,9 +173,11 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
                     </DataGrid.Columns>
                 </DataGrid>
+
+                
+
             </Grid>
         </Border>
 
