@@ -60,5 +60,41 @@ namespace QUAN_LY
             
             this.Close();
         }
-    }
+
+        // 1. Xử lý kéo thả cửa sổ khi giữ chuột vào thanh tiêu đề
+        private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                this.DragMove();
+            }
+        }
+
+        // 2. Nút Ẩn (Minimize)
+        private void btnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        // 3. Nút Phóng to / Thu nhỏ (Maximize / Restore)
+        private void btnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+            {
+                this.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                this.WindowState = WindowState.Maximized;
+            }
+        }
+
+        // 4. Nút Đóng (Close)
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+            // Hoặc dùng this.Close();
+        }
+
+}
 }
