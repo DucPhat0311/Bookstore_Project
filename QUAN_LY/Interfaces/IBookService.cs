@@ -1,9 +1,10 @@
-﻿using System;
+﻿using QUAN_LY.Model;
+using QUAN_LY_APP.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using QUAN_LY.Model;
 
 namespace QUAN_LY.Interfaces
 {
@@ -20,7 +21,7 @@ namespace QUAN_LY.Interfaces
         Task<List<Book>> GetAllBooksAsync();
         Task<List<Book>> SearchBooksAsync(string keyword, CancellationToken token);
 
-
+        Task<DashboardStats> GetDashboardStatsAsync();
 
         List<Book> GetAllBooksForPOS(); // method này chỉ lấy sách chưa xóa và số lượng lớn hơn 0 khác với cái trên
         List<Book> SearchBooksForPOS(string keyword); // hàm tìm kiếm sách cho trang POS

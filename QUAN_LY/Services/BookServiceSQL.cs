@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QUAN_LY.Interfaces;
 using QUAN_LY.Model;
+using QUAN_LY_APP.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -129,9 +130,41 @@ namespace QUAN_LY.Services
             }
         }
 
+        public async Task<DashboardStats> GetDashboardStatsAsync()
+        {
+            using (var context = new BookStoreDbContext())
+            {
+                var stats = new DashboardStats();
+
+                var startOfDay = DateTime.Today;
+                var endOfDay = startOfDay.AddDays(1);
+
+                // Tính doanh thu
+                stats.Revenue = await context.Orders
+                    .Where(x => x.OrderDate >= startOfDay && x.OrderDate < endOfDay)
+                    .SumAsync(x => (decimal?)x.TotalAmount) ?? 0;
+
+                // Đếm đơn hàng
+                stats.OrdersCount = await context.Orders
+                    .CountAsync(x => x.OrderDate >= startOfDay && x.OrderDate < endOfDay);
+
+                // Tính sách bán
+                var queryBooksSold = from o in context.Orders
+                                     join d in context.OrderItems on o.Id equals d.OrderId
+                                     where o.OrderDate >= startOfDay && o.OrderDate < endOfDay
+                                     select (int?)d.Quantity;
+
+                stats.BooksSold = await queryBooksSold.SumAsync() ?? 0;
+
+                // Cảnh báo tồn kho 
+                stats.LowStockCount = await context.Books
+                    .CountAsync(x => x.Quantity < 10 && !x.IsDeleted);
+
+                return stats;
+            }
+        }
 
 
-        // POS related methods
         public List<Book> GetAllBooksForPOS()
         {
             throw new NotImplementedException();

@@ -17,7 +17,6 @@ namespace QUAN_LY.ViewModel
 
         private CancellationTokenSource _cancellationTokenSource;
 
-        #region --- SEARCH PROPERTIES ---
         private ObservableCollection<Book> _bookList;
         public ObservableCollection<Book> BookList
         {
@@ -36,9 +35,6 @@ namespace QUAN_LY.ViewModel
                 OnSearchTextChanged();
             }
         }
-        #endregion
-
-        #region --- DASHBOARD PROPERTIES (MỚI THÊM) ---
 
         // Doanh thu
         private string _todayRevenue = "0 đ";
@@ -72,7 +68,6 @@ namespace QUAN_LY.ViewModel
             set { _lowStockCount = value; OnPropertyChanged(); }
         }
 
-        #endregion
 
         public HomeViewModel()
         {
@@ -84,38 +79,19 @@ namespace QUAN_LY.ViewModel
 
         public async void LoadDashboardStats()
         {
-            await Task.Run(() =>
+            try
             {
-                try
-                {
-                    using (var db = new BookStoreDbContext())
-                    {
-                        var today = DateTime.Today; 
+                var stats = await _bookService.GetDashboardStatsAsync();
 
-                        decimal revenue = db.Orders
-                                            .Where(x => x.OrderDate == today)
-                                            .Sum(x => (decimal?)x.TotalAmount) ?? 0;
-
-                        int ordersCount = db.Orders.Count(x => x.OrderDate == today);
-
-                        int booksSold = (from o in db.Orders
-                                         join d in db.OrderItems on o.Id equals d.OrderId
-                                         where o.OrderDate == today
-                                         select (int?)d.Quantity).Sum() ?? 0;
-
-                        int lowStock = db.Books.Count(x => x.Quantity < 10);
-
-                        TodayRevenue = string.Format("{0:N0} đ", revenue);
-                        TodayOrders = ordersCount;
-                        TodayBooksSold = booksSold;
-                        LowStockCount = lowStock;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    TodayRevenue = "Lỗi";
-                }
-            });
+                TodayRevenue = string.Format("{0:N0} đ", stats.Revenue);
+                TodayOrders = stats.OrdersCount;
+                TodayBooksSold = stats.BooksSold;
+                LowStockCount = stats.LowStockCount;
+            }
+            catch (Exception ex)
+            {
+                TodayRevenue = "Lỗi";
+            }
         }
 
         private async void OnSearchTextChanged()
