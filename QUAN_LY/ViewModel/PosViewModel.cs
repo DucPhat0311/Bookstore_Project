@@ -1,22 +1,23 @@
 ﻿using QUAN_LY.Model;
 using QUAN_LY.Utilities;
+using QUAN_LY.View;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 
 namespace QUAN_LY.ViewModel
 {
     // ==============================================================================
-    // 1. CLASS CART ITEM (ĐƯỢC TINH CHỈNH ĐỂ BINDING HAI CHIỀU)
+    // 1. CLASS CART ITEM
     // ==============================================================================
     public class CartItem : BaseViewModel
     {
         public Book Book { get; set; }
-        public string Title => Book.Title;
 
-        // Xử lý giá: Nếu null thì tính là 0
+        public string Title => Book.Title;
+        public string FullImageSource => Book.FullImageSource;
         public decimal Price => Book.Price;
 
         private int _quantity;
@@ -27,23 +28,21 @@ namespace QUAN_LY.ViewModel
             {
                 _quantity = value;
                 OnPropertyChanged();
-                // Tinh chỉnh: Khi số lượng đổi, thông báo cho giao diện cập nhật ngay SubTotal
                 OnPropertyChanged(nameof(SubTotal));
             }
         }
-
-        // Thành tiền = Giá * Số lượng
         public decimal SubTotal => Price * Quantity;
     }
 
     // ==============================================================================
-    // 2. POS VIEW MODEL (LOGIC CHÍNH)
+    // 2. POS VIEW MODEL
     // ==============================================================================
     public class PosViewModel : BaseViewModel
     {
         private BookStoreDbContext _db = new BookStoreDbContext();
 
         // --- DANH SÁCH DỮ LIỆU ---
+
         private ObservableCollection<Book> _productList;
         public ObservableCollection<Book> ProductList
         {
@@ -51,12 +50,63 @@ namespace QUAN_LY.ViewModel
             set { _productList = value; OnPropertyChanged(); }
         }
 
-        public ObservableCollection<Subject> SubjectList { get; set; }
-        public ObservableCollection<Author> AuthorList { get; set; }
-        public ObservableCollection<Publisher> PublisherList { get; set; }
+        // List gốc để backup dữ liệu cho tìm kiếm
+        private List<Subject> _originSubjectList;
+        private List<Author> _originAuthorList;
+        private List<Publisher> _originPublisherList;
 
-        // --- CÁC BIẾN LỰA CHỌN (FILTER) ---
-        // Tinh chỉnh: Khi chọn xong sẽ gọi hàm FilterProducts() ngay lập tức
+        private ObservableCollection<Subject> _subjectList;
+        public ObservableCollection<Subject> SubjectList { get => _subjectList; set { _subjectList = value; OnPropertyChanged(); } }
+
+        private ObservableCollection<Author> _authorList;
+        public ObservableCollection<Author> AuthorList { get => _authorList; set { _authorList = value; OnPropertyChanged(); } }
+
+        private ObservableCollection<Publisher> _publisherList;
+        public ObservableCollection<Publisher> PublisherList { get => _publisherList; set { _publisherList = value; OnPropertyChanged(); } }
+
+        // --- LOGIC TÌM KIẾM TRONG COMBOBOX (SEARCH LIKE) ---
+
+        private string _subjectSearchText;
+        public string SubjectSearchText
+        {
+            get => _subjectSearchText;
+            set
+            {
+                _subjectSearchText = value;
+                OnPropertyChanged();
+                if (string.IsNullOrEmpty(value)) SubjectList = new ObservableCollection<Subject>(_originSubjectList);
+                else SubjectList = new ObservableCollection<Subject>(_originSubjectList.Where(x => x.Name.ToLower().Contains(value.ToLower())));
+            }
+        }
+
+        private string _authorSearchText;
+        public string AuthorSearchText
+        {
+            get => _authorSearchText;
+            set
+            {
+                _authorSearchText = value;
+                OnPropertyChanged();
+                if (string.IsNullOrEmpty(value)) AuthorList = new ObservableCollection<Author>(_originAuthorList);
+                else AuthorList = new ObservableCollection<Author>(_originAuthorList.Where(x => x.Name.ToLower().Contains(value.ToLower())));
+            }
+        }
+
+        private string _publisherSearchText;
+        public string PublisherSearchText
+        {
+            get => _publisherSearchText;
+            set
+            {
+                _publisherSearchText = value;
+                OnPropertyChanged();
+                if (string.IsNullOrEmpty(value)) PublisherList = new ObservableCollection<Publisher>(_originPublisherList);
+                else PublisherList = new ObservableCollection<Publisher>(_originPublisherList.Where(x => x.Name.ToLower().Contains(value.ToLower())));
+            }
+        }
+
+        // --- FILTER SẢN PHẨM ---
+
         private Subject _selectedSubject;
         public Subject SelectedSubject { get => _selectedSubject; set { _selectedSubject = value; OnPropertyChanged(); FilterProducts(); } }
 
@@ -70,12 +120,14 @@ namespace QUAN_LY.ViewModel
         public string SearchKeyword { get => _searchKeyword; set { _searchKeyword = value; OnPropertyChanged(); FilterProducts(); } }
 
         // --- GIỎ HÀNG ---
+
         public ObservableCollection<CartItem> CartItems { get; set; } = new ObservableCollection<CartItem>();
 
         private decimal _cartTotal;
         public decimal CartTotal { get => _cartTotal; set { _cartTotal = value; OnPropertyChanged(); } }
 
-        // --- COMMANDS (CÁC LỆNH TỪ VIEW) ---
+        // --- COMMANDS ---
+
         public ICommand AddToCartCommand { get; set; }
         public ICommand RemoveFromCartCommand { get; set; }
         public ICommand IncreaseQtyCommand { get; set; }
@@ -83,23 +135,21 @@ namespace QUAN_LY.ViewModel
         public ICommand ClearCartCommand { get; set; }
         public ICommand ClearFilterCommand { get; set; }
         public ICommand CheckoutCommand { get; set; }
+        public ICommand AddProductCommand { get; set; }
 
         // ==============================================================================
         // CONSTRUCTOR
         // ==============================================================================
         public PosViewModel()
         {
-            LoadMetaData();     // Tải danh mục (Tác giả, Thể loại...)
-            FilterProducts();   // Tải danh sách sách
+            LoadMetaData();
+            FilterProducts();
 
-            // 1. Logic Thêm vào giỏ
             AddToCartCommand = new RelayCommand<Book>((book) =>
             {
                 var existingItem = CartItems.FirstOrDefault(x => x.Book.Id == book.Id);
-
                 if (existingItem != null)
                 {
-                    // Nếu đã có -> Tăng số lượng (Kiểm tra tồn kho)
                     if (existingItem.Quantity < book.Quantity)
                     {
                         existingItem.Quantity++;
@@ -107,12 +157,11 @@ namespace QUAN_LY.ViewModel
                     }
                     else
                     {
-                        MessageBox.Show($"Kho chỉ còn {book.Quantity} cuốn.", "Hết hàng");
+                        CustomMessageBox.Show($"Kho chỉ còn {book.Quantity} cuốn. Không thể bán thêm.", "Hết hàng", MessageBoxType.Warning);
                     }
                 }
                 else
                 {
-                    // Nếu chưa có -> Thêm mới
                     if (book.Quantity > 0)
                     {
                         CartItems.Add(new CartItem { Book = book, Quantity = 1 });
@@ -120,15 +169,13 @@ namespace QUAN_LY.ViewModel
                     }
                     else
                     {
-                        MessageBox.Show("Sách này đã hết hàng.", "Thông báo");
+                        CustomMessageBox.Show("Sách này đã hết hàng.", "Thông báo", MessageBoxType.Info);
                     }
                 }
             });
 
-            // 2. Logic Tăng số lượng (+)
             IncreaseQtyCommand = new RelayCommand<CartItem>((item) =>
             {
-                // Kiểm tra tồn kho real-time
                 if (item.Quantity < item.Book.Quantity)
                 {
                     item.Quantity++;
@@ -136,11 +183,10 @@ namespace QUAN_LY.ViewModel
                 }
                 else
                 {
-                    MessageBox.Show("Đã đạt giới hạn tồn kho.", "Thông báo");
+                    CustomMessageBox.Show("Đã đạt giới hạn tồn kho.", "Thông báo", MessageBoxType.Warning);
                 }
             });
 
-            // 3. Logic Giảm số lượng (-)
             DecreaseQtyCommand = new RelayCommand<CartItem>((item) =>
             {
                 if (item.Quantity > 1)
@@ -150,9 +196,8 @@ namespace QUAN_LY.ViewModel
                 }
                 else
                 {
-                    // Nếu giảm về 0 thì hỏi xóa
-                    var ans = MessageBox.Show("Bạn muốn bỏ sách này khỏi giỏ?", "Xác nhận", MessageBoxButton.YesNo);
-                    if (ans == MessageBoxResult.Yes)
+                    var ans = CustomMessageBox.Show($"Bạn có chắc muốn bỏ sách '{item.Title}' khỏi giỏ?", "Xác nhận", MessageBoxType.Confirmation);
+                    if (ans == true)
                     {
                         CartItems.Remove(item);
                         UpdateCartTotal();
@@ -160,72 +205,87 @@ namespace QUAN_LY.ViewModel
                 }
             });
 
-            // 4. Logic Xóa 1 món
             RemoveFromCartCommand = new RelayCommand<CartItem>((item) =>
             {
-                CartItems.Remove(item);
-                UpdateCartTotal();
+                var ans = CustomMessageBox.Show($"Xóa sách '{item.Title}' khỏi giỏ hàng?", "Xác nhận", MessageBoxType.Confirmation);
+                if (ans == true)
+                {
+                    CartItems.Remove(item);
+                    UpdateCartTotal();
+                }
             });
 
-            // 5. Logic Xóa hết giỏ
             ClearCartCommand = new RelayCommand<object>((p) =>
             {
-                CartItems.Clear();
-                UpdateCartTotal();
+                if (CartItems.Count > 0)
+                {
+                    var ans = CustomMessageBox.Show("Bạn muốn xóa toàn bộ giỏ hàng?", "Xác nhận", MessageBoxType.Confirmation);
+                    if (ans == true)
+                    {
+                        CartItems.Clear();
+                        UpdateCartTotal();
+                    }
+                }
             });
 
-            // 6. Logic Reset bộ lọc
             ClearFilterCommand = new RelayCommand<object>((p) =>
             {
                 SelectedSubject = null;
                 SelectedAuthor = null;
                 SelectedPublisher = null;
+
+                SubjectSearchText = "";
+                AuthorSearchText = "";
+                PublisherSearchText = "";
                 SearchKeyword = "";
+
                 FilterProducts();
             });
 
-            // 7. Logic Thanh toán
             CheckoutCommand = new RelayCommand<object>((p) => Checkout());
+
+            AddProductCommand = new RelayCommand<object>((p) =>
+            {
+                CustomMessageBox.Show("Tính năng đang phát triển!", "Thông báo", MessageBoxType.Info);
+            });
         }
 
         // ==============================================================================
-        // CÁC HÀM XỬ LÝ (HELPER METHODS)
+        // CÁC HÀM XỬ LÝ PHỤ TRỢ
         // ==============================================================================
 
         private void LoadMetaData()
         {
-            // Reset DB Context để lấy dữ liệu mới nhất
             _db = new BookStoreDbContext();
-            SubjectList = new ObservableCollection<Subject>(_db.Subjects.ToList());
-            AuthorList = new ObservableCollection<Author>(_db.Authors.ToList());
-            PublisherList = new ObservableCollection<Publisher>(_db.Publishers.ToList());
+
+            _originSubjectList = _db.Subjects.ToList();
+            SubjectList = new ObservableCollection<Subject>(_originSubjectList);
+
+            _originAuthorList = _db.Authors.ToList();
+            AuthorList = new ObservableCollection<Author>(_originAuthorList);
+
+            _originPublisherList = _db.Publishers.ToList();
+            PublisherList = new ObservableCollection<Publisher>(_originPublisherList);
         }
 
         private void FilterProducts()
         {
-            // Lấy tất cả sách chưa xóa
             var query = _db.Books.Where(b => !b.IsDeleted);
 
-            // Áp dụng các bộ lọc nếu có
             if (!string.IsNullOrEmpty(SearchKeyword))
                 query = query.Where(b => b.Title.Contains(SearchKeyword));
-
             if (SelectedSubject != null)
                 query = query.Where(b => b.SubjectId == SelectedSubject.Id);
-
             if (SelectedAuthor != null)
                 query = query.Where(b => b.AuthorId == SelectedAuthor.Id);
-
             if (SelectedPublisher != null)
                 query = query.Where(b => b.PublisherId == SelectedPublisher.Id);
 
-            // Đổ dữ liệu ra View
             ProductList = new ObservableCollection<Book>(query.ToList());
         }
 
         private void UpdateCartTotal()
         {
-            // Tính tổng tiền dựa trên SubTotal của từng CartItem
             CartTotal = CartItems.Sum(x => x.SubTotal);
         }
 
@@ -233,37 +293,36 @@ namespace QUAN_LY.ViewModel
         {
             if (CartItems.Count == 0)
             {
-                MessageBox.Show("Vui lòng chọn sách trước khi thanh toán.", "Giỏ hàng trống");
+                CustomMessageBox.Show("Giỏ hàng đang trống. Vui lòng chọn sách!", "Cảnh báo", MessageBoxType.Warning);
                 return;
             }
 
+            var confirm = CustomMessageBox.Show($"Xác nhận thanh toán tổng cộng {CartTotal:N0} VNĐ?", "Thanh toán", MessageBoxType.Confirmation);
+            if (confirm != true) return;
+
             try
             {
-                // Tạo đơn hàng mới
                 var order = new Order
                 {
                     OrderDate = DateTime.Now,
                     TotalAmount = CartTotal,
-                    Status = 1, // Đã thanh toán
-                    AdminId = App.CurrentUser != null ? App.CurrentUser.AdminId : 1 // Đã chỉnh lại được AdminId
+                    Status = 1,
+                    AdminId = App.CurrentUser != null ? App.CurrentUser.AdminId : 1
                 };
 
                 _db.Orders.Add(order);
-                _db.SaveChanges(); // Lưu để sinh ra OrderId
+                _db.SaveChanges();
 
-                // Lưu chi tiết đơn hàng và trừ kho
                 foreach (var item in CartItems)
                 {
-                    var orderItem = new OrderItem
+                    _db.OrderItems.Add(new OrderItem
                     {
                         OrderId = order.Id,
                         BookId = item.Book.Id,
                         Quantity = item.Quantity,
                         Price = item.Price
-                    };
-                    _db.OrderItems.Add(orderItem);
+                    });
 
-                    // Trừ tồn kho
                     var bookInDb = _db.Books.Find(item.Book.Id);
                     if (bookInDb != null)
                     {
@@ -271,21 +330,18 @@ namespace QUAN_LY.ViewModel
                     }
                 }
 
-                _db.SaveChanges(); // Lưu tất cả thay đổi
+                _db.SaveChanges();
 
-                MessageBox.Show("Thanh toán thành công!", "Hoàn tất", MessageBoxButton.OK, MessageBoxImage.Information);
+                CustomMessageBox.Show("Thanh toán thành công! Hóa đơn đã được lưu.", "Hoàn tất", MessageBoxType.Success);
 
-                // Reset giao diện sau khi bán
                 CartItems.Clear();
                 UpdateCartTotal();
-
-                // Tải lại dữ liệu sách (để cập nhật số lượng tồn kho mới lên giao diện)
                 LoadMetaData();
                 FilterProducts();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Có lỗi xảy ra: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                CustomMessageBox.Show("Có lỗi xảy ra: " + ex.Message, "Lỗi hệ thống", MessageBoxType.Error);
             }
         }
     }
