@@ -1,8 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using QUAN_LY.ViewModel; 
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using QUAN_LY.ViewModel; 
 
 namespace QUAN_LY
 {
@@ -50,14 +51,17 @@ namespace QUAN_LY
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-           
+            
             App.CurrentUser = null;
 
-           
-            LoginWindowView loginWindow = new LoginWindowView();
+            
+            var loginWindow = App.Current.Services.GetRequiredService<LoginWindowView>();
+            
+            loginWindow.DataContext = App.Current.Services.GetRequiredService<ViewModel.LoginViewModel>();
+
             loginWindow.Show();
 
-            
+           
             this.Close();
         }
 
