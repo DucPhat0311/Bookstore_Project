@@ -1,5 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using QUAN_LY.Interfaces;
 using QUAN_LY.Model;
 using System;
@@ -13,9 +12,10 @@ namespace QUAN_LY.Services
     {
         private readonly BookStoreDbContext _context;
 
-        public AdminServiceSQL()
+      
+        public AdminServiceSQL(BookStoreDbContext context)
         {
-            _context = new BookStoreDbContext();
+            _context = context;
         }
 
         public async Task<List<Admin>> GetAllActiveAdminsAsync()
@@ -35,16 +35,15 @@ namespace QUAN_LY.Services
         {
             try
             {
-                // Validate business rules
                 if (await IsUsernameExistsAsync(admin.Username))
                     return (false, "Tên đăng nhập đã tồn tại");
 
-                if (string.IsNullOrEmpty(admin.Password))
-                    return (false, "Mật khẩu không được để trống");
-
-                // Hash password
-                admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(admin.Password);
-                admin.Password = null; // Clear plain password
+              
+                if (!string.IsNullOrEmpty(admin.Password))
+                {
+                   
+                    admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(admin.Password);
+                }
 
                 _context.Admins.Add(admin);
                 await _context.SaveChangesAsync();
@@ -56,49 +55,23 @@ namespace QUAN_LY.Services
             }
         }
 
-
-        public async Task<Admin> LoginAsync(string username, string password)
-        {
-            var admin = await _context.Admins
-                .FirstOrDefaultAsync(a => a.Username == username && a.IsActive);
-
-            if (admin == null) return null;
-
-           
-          
-
-           
-            bool isValid = BCrypt.Net.BCrypt.Verify(password, admin.PasswordHash);
-
-            if (isValid)
-            {
-                return admin;
-            }
-
-            return null;
-        }
-
         public async Task<(bool Success, string Message)> UpdateAdminAsync(Admin admin)
         {
             try
             {
-                if (await IsUsernameExistsAsync(admin.Username, admin.AdminId))
-                    return (false, "Tên đăng nhập đã tồn tại");
+                var existingAdmin = await _context.Admins.FindAsync(admin.AdminId);
+                if (existingAdmin == null) return (false, "Không tìm thấy nhân viên");
 
-                var existing = await _context.Admins.FindAsync(admin.AdminId);
-                if (existing == null)
-                    return (false, "Không tìm thấy nhân viên");
+              
+                existingAdmin.Name = admin.Name;
+                existingAdmin.Role = admin.Role;
+                existingAdmin.Username = admin.Username; 
 
-                // Keep password hash if password not changed
+               
                 if (!string.IsNullOrEmpty(admin.Password))
                 {
-                    existing.PasswordHash = BCrypt.Net.BCrypt.HashPassword(admin.Password);
+                    existingAdmin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(admin.Password);
                 }
-
-                existing.Name = admin.Name;
-                existing.Username = admin.Username;
-                existing.Role = admin.Role;
-                existing.IsActive = admin.IsActive;
 
                 await _context.SaveChangesAsync();
                 return (true, "Cập nhật thành công");
@@ -115,12 +88,10 @@ namespace QUAN_LY.Services
             {
                 var admin = await _context.Admins.FindAsync(id);
                 if (admin == null) return (false, "Không tìm thấy nhân viên");
-                if (!admin.IsActive) return (false, "Nhân viên đã nghỉ việc");
-                if (admin.Role == "Super Admin") return (false, "Không thể xóa Super Admin");
 
                 admin.IsActive = false;
                 await _context.SaveChangesAsync();
-                return (true, "Xóa nhân viên thành công");
+                return (true, "Đã xóa nhân viên");
             }
             catch (Exception ex)
             {
@@ -131,31 +102,34 @@ namespace QUAN_LY.Services
         public async Task<List<Admin>> SearchAdminsAsync(string keyword)
         {
             var query = _context.Admins.Where(a => a.IsActive);
-
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                var lowerKeyword = keyword.ToLower();
-                query = query.Where(a =>
-                    a.Name.ToLower().Contains(lowerKeyword) ||
-                    a.Username.ToLower().Contains(lowerKeyword));
+                string k = keyword.ToLower();
+                query = query.Where(a => a.Name.ToLower().Contains(k) || a.Username.ToLower().Contains(k));
             }
-
-            return await query.OrderBy(a => a.Name).ToListAsync();
+            return await query.ToListAsync();
         }
 
         public async Task<bool> IsUsernameExistsAsync(string username, int? excludeId = null)
         {
-            return await _context.Admins
-                .AnyAsync(a => a.Username == username.ToLower() &&
-                              (excludeId == null || a.AdminId != excludeId));
+            return await _context.Admins.AnyAsync(a => a.Username == username && (excludeId == null || a.AdminId != excludeId));
         }
 
         public async Task<bool> VerifyPasswordAsync(int adminId, string password)
         {
             var admin = await _context.Admins.FindAsync(adminId);
             if (admin == null) return false;
-     
             return BCrypt.Net.BCrypt.Verify(password, admin.PasswordHash);
+        }
+
+        
+        public async Task<Admin> LoginAsync(string username, string password)
+        {
+            var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == username && a.IsActive);
+            if (admin == null) return null;
+
+            bool isPasswordCorrect = BCrypt.Net.BCrypt.Verify(password, admin.PasswordHash);
+            return isPasswordCorrect ? admin : null;
         }
     }
 }
