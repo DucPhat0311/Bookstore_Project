@@ -16,16 +16,11 @@ using QUAN_LY.ViewModel;
 
 namespace QUAN_LY.View
 {
-    /// <summary>
-    /// Interaction logic for RevenueStatisticsView.xaml
-    /// </summary>
     public partial class RevenueStatisticsView : UserControl
     {
         public RevenueStatisticsView()
         {
             InitializeComponent();
-            // Loại bỏ dòng này để tránh ghi đè không cần thiết (DataContext đã được set trong XAML nếu cần)
-            // this.DataContext = new QUAN_LY.ViewModel.RevenueStatisticsViewModel();
         }
     }
 }
