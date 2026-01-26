@@ -16,7 +16,7 @@ namespace QUAN_LY.ViewModel
         private BookStoreDbContext _dbContext;
         private DispatcherTimer _refreshTimer;
 
-        // Số liệu tổng (giữ nguyên, nhưng cập nhật từ DB)
+        // Số liệu tổng
         private decimal _totalRevenue;
         public decimal TotalRevenue
         {
@@ -38,7 +38,7 @@ namespace QUAN_LY.ViewModel
             set { _totalProfit = value; OnPropertyChanged(); }
         }
 
-        // Biểu đồ đường (chỉnh sửa để hiển thị theo 7 ngày gần nhất, với đường cong màu)
+        // Biểu đồ đường (7 ngày gần ngất)
         private SeriesCollection _revenueProfitSeries;
         public SeriesCollection RevenueProfitSeries
         {
@@ -53,7 +53,7 @@ namespace QUAN_LY.ViewModel
             set { _labels = value; OnPropertyChanged(); }
         }
 
-        // Formatter (giữ nguyên)
+        // Formatter
         private Func<double, string> _formatter;
         public Func<double, string> Formatter
         {
@@ -61,7 +61,7 @@ namespace QUAN_LY.ViewModel
             set { _formatter = value; OnPropertyChanged(); }
         }
 
-        // Bảng xếp hạng (giữ nguyên, cập nhật từ DB)
+        // Bảng xếp hạng(dựa trên số lượng bán)
         private List<BookSales> _topSellingBooks;
         public List<BookSales> TopSellingBooks
         {
@@ -85,7 +85,7 @@ namespace QUAN_LY.ViewModel
             Formatter = value => value.ToString("N0") + " VND";
             LoadData(null);
 
-            // Timer (giữ nguyên, để cập nhật tự động từ DB)
+            // Timer 
             _refreshTimer = new DispatcherTimer();
             _refreshTimer.Interval = TimeSpan.FromSeconds(30);
             _refreshTimer.Tick += (sender, e) => LoadData(null);
@@ -96,21 +96,17 @@ namespace QUAN_LY.ViewModel
         {
             try
             {
-                // Tính toán (giữ nguyên TotalRevenue, nhưng cập nhật từ DB)
+                // Tính toán 
                 TotalRevenue = _dbContext.Orders
                  .Where(o => o.Status == 1)
-                 .Sum(o => o.TotalAmount) ?? 0;  // Nếu sai, thay thành o.total_amount
+                 .Sum(o => o.TotalAmount) ?? 0; 
 
-                // Cập nhật: Tính TotalCapital từ total_cost trong ImportReceipts (thay vì từ ImportDetails)
                 TotalCapital = _dbContext.ImportReceipts
                     .Where(ir => ir.Status == 1)
                     .Sum(ir => ir.TotalCost);
-
-                // *** THAY ĐỔI: Đơn giản hóa TotalProfit = TotalRevenue - TotalCapital ***
-                // (Trước đây tính chi tiết lợi nhuận chỉ cho sách đã bán; giờ đơn giản hóa theo yêu cầu)
                 TotalProfit = TotalRevenue - TotalCapital;
 
-                // Biểu đồ – Thay đổi để hiển thị theo 7 ngày gần nhất, với đường cong màu (thay vì chỉ tổng)
+                // Biểu đồ – hiển thị theo 7 ngày gần nhất
                 var revenueData = new ChartValues<decimal>();
                 var profitData = new ChartValues<decimal>();
                 var labels = new List<string>();
@@ -122,13 +118,13 @@ namespace QUAN_LY.ViewModel
                     var dayStart = day.Date;
                     var dayEnd = day.Date.AddDays(1).AddTicks(-1);
 
-                    // Tính doanh thu cho ngày từ DB
+                    // Tính doanh thu cho ngày
                     var rev = _dbContext.Orders
                         .Where(o => o.Status == 1 && o.OrderDate >= dayStart && o.OrderDate <= dayEnd)
                         .Sum(o => (decimal?)o.TotalAmount) ?? 0;
                     revenueData.Add(rev);
 
-                    // Tính lợi nhuận cho ngày từ DB (giữ logic gốc: doanh thu - chi phí nhập cho ngày)
+                    // Tính lợi nhuận cho ngày
                     var totalRevBooksDay = _dbContext.OrderItems
                         .Join(_dbContext.Orders, oi => oi.OrderId, o => o.Id, (oi, o) => new { oi, o })
                         .Where(x => x.o.Status == 1 && x.o.OrderDate >= dayStart && x.o.OrderDate <= dayEnd)
@@ -149,7 +145,7 @@ namespace QUAN_LY.ViewModel
                     labels.Add(day.ToString("dd MMM yyyy"));
                 }
 
-                // Biểu đồ đường cong màu (thêm LineSmoothness và Fill để tạo đường cong mượt với màu)
+                // Biểu đồ đường cong màu
                 RevenueProfitSeries = new SeriesCollection
                 {
                     new LineSeries
@@ -157,8 +153,8 @@ namespace QUAN_LY.ViewModel
                         Title = "Doanh thu",
                         Values = revenueData,
                         Stroke = System.Windows.Media.Brushes.Green,
-                        Fill = System.Windows.Media.Brushes.LightGreen, // Thêm fill để tạo hiệu ứng "đường cong màu"
-                        LineSmoothness = 0.3, // Thêm để đường cong mượt
+                        Fill = System.Windows.Media.Brushes.LightGreen,
+                        LineSmoothness = 0.3, 
                         DataLabels = true,
                         LabelPoint = point => $"{point.Y:N0} VND"
                     },
@@ -167,15 +163,15 @@ namespace QUAN_LY.ViewModel
                         Title = "Lợi nhuận",
                         Values = profitData,
                         Stroke = System.Windows.Media.Brushes.Orange,
-                        Fill = System.Windows.Media.Brushes.LightSalmon, // Thêm fill để tạo hiệu ứng "đường cong màu"
-                        LineSmoothness = 0.3, // Thêm để đường cong mượt
+                        Fill = System.Windows.Media.Brushes.LightSalmon,
+                        LineSmoothness = 0.3, 
                         DataLabels = true,
                         LabelPoint = point => $"{point.Y:N0} VND"
                     }
                 };
                 Labels = labels.ToArray();
 
-                // Top 5 (giữ nguyên, cập nhật từ DB)
+                // Top 5 
                 TopSellingBooks = _dbContext.Books
                     .GroupJoin(_dbContext.OrderItems, b => b.Id, oi => oi.BookId, (b, ois) => new { Book = b, TotalSold = ois.Sum(oi => oi.Quantity) })
                     .Select(x => new BookSales { BookTitle = x.Book.Title, TotalSold = x.TotalSold ?? 0 })
