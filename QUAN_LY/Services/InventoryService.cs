@@ -1,5 +1,5 @@
 ﻿using QUAN_LY.Model;
-
+using QUAN_LY_APP.Interfaces;
 using System;
 
 using System.Collections.Generic;
@@ -11,8 +11,9 @@ using System.Linq;
 namespace QUAN_LY.Services
 
 { 
-    public class InventoryService
+    public class InventoryService : IInventoryService
     {
+     
         public bool ProcessImport(int adminId, int publisherId, decimal totalCost, List<ImportDetail> items)
         {
             using (var _context = new BookStoreDbContext())
