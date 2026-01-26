@@ -40,11 +40,7 @@
                                Foreground="#666"
                                Margin="0,0,0,30"/>
 
-                    <TextBlock Text="AnTromCode" 
-                               FontSize="24" 
-                               FontWeight="SemiBold"
-                               Foreground="#623ed0"
-                               Margin="0,0,0,40"/>
+                   
 
                     <TextBlock Text="UserName" 
                                Foreground="#666" 
@@ -126,17 +122,7 @@
                         </Button.Resources>
                     </Button>
 
-                    <StackPanel Margin="0,20,0,0">
-                        <TextBlock Text="Tài khoản demo:" 
-                                   Foreground="#888" 
-                                   FontSize="12"/>
-                        <TextBlock Text="Username: admin" 
-                                   Foreground="#888" 
-                                   FontSize="11"/>
-                        <TextBlock Text="Password: 123456" 
-                                   Foreground="#888" 
-                                   FontSize="11"/>
-                    </StackPanel>
+                   
                 </StackPanel>
             </Grid>
 
@@ -148,7 +134,7 @@
                                Foreground="#623ed0"
                                Margin="0,0,0,20"/>
 
-                    <TextBlock Text="Hệ thống quản lý sách hại điện" 
+                    <TextBlock Text="Hệ thống quản lý sách hiện đại" 
                                FontSize="18" 
                                Foreground="#666"
                                TextAlignment="Center"
