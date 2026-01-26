@@ -1,7 +1,7 @@
-﻿
-using QUAN_LY.ViewModel;
+﻿using QUAN_LY.ViewModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input; 
 
 namespace QUAN_LY.View
 {
@@ -26,11 +26,17 @@ namespace QUAN_LY.View
             if (DataContext is AdminViewModel vm && vm.NewAdmin != null)
             {
                 vm.PasswordInput = ((PasswordBox)sender).Password;
-
-                // Set password để validate
                 vm.NewAdmin.Password = vm.PasswordInput;
-                vm.NewAdmin.ValidateProperty();
+
+                
+                CommandManager.InvalidateRequerySuggested();
             }
+        }
+
+       
+        private void Border_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
         }
     }
 }
