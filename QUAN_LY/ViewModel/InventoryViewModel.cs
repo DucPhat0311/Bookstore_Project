@@ -1,32 +1,33 @@
-﻿using QUAN_LY.Model;
+﻿using Microsoft.Win32;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using QUAN_LY.Model;
+using QUAN_LY.Services;
 using QUAN_LY.Utilities;
+using QUAN_LY_APP.Interfaces;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.Win32;
-using System.IO;
-using OfficeOpenXml;
-using OfficeOpenXml.Style;
 
 namespace QUAN_LY.ViewModel
 {
     public class InventoryViewModel : BaseViewModel, IDataErrorInfo
     {
         private BookStoreDbContext _db = new BookStoreDbContext();
+        private readonly IInventoryService _inventoryService;
 
         public ObservableCollection<Publisher> PublisherList { get; set; } = new();
         public ObservableCollection<Book> FilteredBookList { get; set; } = new();
         public ObservableCollection<ImportDetail> ImportItems { get; set; } = new();
 
-        // Thay đổi thành ObservableCollection<object> để chứa Anonymous Type có thông tin Admin
         public ObservableCollection<object> ImportHistory { get; set; } = new();
 
         private bool _isHistoryView = false;
         public bool IsHistoryView { get => _isHistoryView; set { _isHistoryView = value; OnPropertyChanged(); } }
-
         private Publisher _selectedPublisher;
         public Publisher SelectedPublisher { get => _selectedPublisher; set { _selectedPublisher = value; OnPropertyChanged(); FilterBooks(); } }
 
@@ -52,17 +53,18 @@ namespace QUAN_LY.ViewModel
                 return null;
             }
         }
-
         public ICommand AddItemCommand { get; set; }
         public ICommand SaveCommand { get; set; }
         public ICommand NewReceiptCommand { get; set; }
         public ICommand ToggleHistoryCommand { get; set; }
         public ICommand ExportHistoryExcelCommand { get; set; }
-
         public InventoryViewModel()
         {
-            LoadInitialData();
+            _inventoryService = new InventoryService();
 
+            ImportItems = new ObservableCollection<ImportDetail>();
+            LoadInitialData();
+            // Khởi tạo lệnh làm mới phiếu nhập
             NewReceiptCommand = new RelayCommand<object>((p) => {
                 ImportItems.Clear();
                 SelectedBook = null;
@@ -70,12 +72,12 @@ namespace QUAN_LY.ViewModel
                 InputPrice = "0";
                 TotalCost = 0;
             });
-
+            // Khởi tạo lệnh chuyển đổi lịch sử
             ToggleHistoryCommand = new RelayCommand<object>((p) => {
                 IsHistoryView = !IsHistoryView;
                 if (IsHistoryView) LoadHistory();
             });
-
+            // Khởi tạo lệnh thêm món hàng
             AddItemCommand = new RelayCommand<object>((p) => {
                 ImportItems.Add(new ImportDetail
                 {
@@ -84,42 +86,41 @@ namespace QUAN_LY.ViewModel
                     quantity = int.Parse(InputQty),
                     importPrice = decimal.Parse(InputPrice)
                 });
+                // Cập nhật lại Tổng tiền
                 TotalCost = ImportItems.Sum(x => x.quantity * x.importPrice);
             }, (p) => SelectedBook != null && string.IsNullOrEmpty(this[nameof(InputQty)]) && string.IsNullOrEmpty(this[nameof(InputPrice)]));
-
-            SaveCommand = new RelayCommand<object>((p) => {
-                try
+            // Khởi tạo lệnh lưu phiếu nhập
+            SaveCommand = new RelayCommand<object>(
+                (p) =>
                 {
-                    var receipt = new ImportReceipt
-                    {
-                        PublisherId = SelectedPublisher.Id,
-                        // Thêm AdminId từ User hiện tại của App (giống OrderViewModel)
-                        AdminId = App.CurrentUser?.AdminId,
-                        ImportDate = DateTime.Now,
-                        TotalCost = TotalCost
-                    };
-                    _db.ImportReceipts.Add(receipt);
-                    _db.SaveChanges();
+                    bool success = _inventoryService.ProcessImport(
+                        App.CurrentUser.AdminId,
+                        SelectedPublisher.Id,
+                        TotalCost,
+                        ImportItems.ToList()
+                    );
 
-                    foreach (var item in ImportItems)
+                    if (success)
                     {
-                        item.importId = receipt.Id;
-                        _db.ImportDetails.Add(item);
-                        var b = _db.Books.Find(item.BookId);
-                        if (b != null) b.Quantity += item.quantity;
+                        MessageBox.Show("Nhập kho thành công!");
+                        NewReceiptCommand.Execute(null);
                     }
-                    _db.SaveChanges();
-                    MessageBox.Show("Nhập kho thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                    NewReceiptCommand.Execute(null);
-                }
-                catch (Exception ex) { MessageBox.Show("Lỗi lưu DB: " + ex.Message); }
-            }, (p) => ImportItems.Count > 0 && SelectedPublisher != null);
+                    else
+                    {
+                        MessageBox.Show("Nhập kho thất bại!");
+                    }
+                },
+                (p) =>
+                {
+                    return ImportItems.Count > 0 && SelectedPublisher != null;
+                });
+
 
             ExportHistoryExcelCommand = new RelayCommand<object>((p) => ExportHistoryToExcel(), (p) => IsHistoryView && ImportHistory.Count > 0);
         }
-
         private void ExportHistoryToExcel()
         {
+
             OfficeOpenXml.ExcelPackage.License.SetNonCommercialOrganization("QUAN_LY");
             SaveFileDialog sfd = new SaveFileDialog()
             {
@@ -134,7 +135,6 @@ namespace QUAN_LY.ViewModel
                     using (var pck = new OfficeOpenXml.ExcelPackage())
                     {
                         var ws = pck.Workbook.Worksheets.Add("Lịch Sử Nhập Kho");
-                        // Thêm cột Người thực hiện vào header Excel
                         string[] headers = { "Ngày Nhập", "Người Thực Hiện", "Tên Sách", "Số Lượng", "Đơn Giá", "Thành Tiền" };
                         for (int i = 0; i < headers.Length; i++)
                         {
@@ -150,7 +150,7 @@ namespace QUAN_LY.ViewModel
                         foreach (dynamic item in ImportHistory)
                         {
                             ws.Cells[row, 1].Value = item.ImportDate?.ToString("dd/MM/yyyy HH:mm");
-                            ws.Cells[row, 2].Value = item.StaffName; // Lấy tên Admin
+                            ws.Cells[row, 2].Value = item.StaffName; 
                             ws.Cells[row, 3].Value = item.Title;
                             ws.Cells[row, 4].Value = item.quantity;
                             ws.Cells[row, 5].Value = item.importPrice;
@@ -158,6 +158,7 @@ namespace QUAN_LY.ViewModel
                             ws.Cells[row, 5, row, 6].Style.Numberformat.Format = "#,##0";
                             row++;
                         }
+
                         ws.Cells.AutoFitColumns();
                         File.WriteAllBytes(sfd.FileName, pck.GetAsByteArray());
                         MessageBox.Show("Xuất file Excel thành công!");
@@ -166,7 +167,6 @@ namespace QUAN_LY.ViewModel
                 catch (Exception ex) { MessageBox.Show("Lỗi: " + ex.Message); }
             }
         }
-
         private void FilterBooks()
         {
             FilteredBookList.Clear();
@@ -175,10 +175,10 @@ namespace QUAN_LY.ViewModel
             foreach (var b in list) FilteredBookList.Add(b);
         }
 
-        // Cập nhật LoadHistory để Join với bảng Admin giống OrderViewModel
         private void LoadHistory()
         {
             ImportHistory.Clear();
+            // Sử dụng LINQ để lấy dữ liệu từ nhiều bảng và bao gồm tên Admin
             var data = (from d in _db.ImportDetails
                         join r in _db.ImportReceipts on d.importId equals r.Id
                         join b in _db.Books on d.BookId equals b.Id
