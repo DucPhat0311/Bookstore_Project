@@ -1,29 +1,76 @@
-﻿using QUAN_LY.Model;
-using QUAN_LY.Services;
-using QUAN_LY.Utilities; // Chứa RelayCommand
+﻿using QUAN_LY.Interfaces;
+using QUAN_LY.Model;
+using QUAN_LY.Utilities;
 using QUAN_LY.View;
 using System;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace QUAN_LY.ViewModel
 {
     public class LoginViewModel : BaseViewModel
     {
-        private readonly AdminServiceSQL _adminService;
+        private readonly IAdminService _adminService;
 
+        public LoginViewModel(IAdminService adminService)
+        {
+            _adminService = adminService;
+            LoginCommand = new RelayCommand(ExecuteLogin, CanLogin); 
+        }
+
+
+        private string _userNameError;
+        public string UserNameError
+        {
+            get => _userNameError;
+            set { _userNameError = value; OnPropertyChanged(); }
+        }
+
+        
         private string _username;
         public string Username
         {
             get => _username;
-            set { _username = value; OnPropertyChanged(); }
+            set
+            {
+                _username = value;
+                OnPropertyChanged();
+
+               
+                if (!string.IsNullOrEmpty(ErrorMessage)) ErrorMessage = "";
+
+              
+                ValidateUserName();
+            }
         }
 
-        private string _password;
-        public string Password
+       
+        private void ValidateUserName()
         {
-            get => _password;
-            set { _password = value; OnPropertyChanged(); }
+            if (string.IsNullOrEmpty(Username))
+            {
+                UserNameError = "Tên đăng nhập không được để trống";
+            }
+            else if (Username.Contains(" "))
+            {
+                UserNameError = "Tên đăng nhập không được chứa khoảng trắng";
+            }
+            else if (Username.Length < 3)
+            {
+                UserNameError = "Tên đăng nhập quá ngắn (tối thiểu 3 ký tự)";
+            }
+            
+            else if (!Username.All(c => char.IsLetterOrDigit(c) || c == '_'))
+            {
+                UserNameError = "Tên đăng nhập chứa ký tự không hợp lệ";
+            }
+            else
+            {
+                UserNameError = "";
+            }
         }
 
         private string _errorMessage;
@@ -33,7 +80,6 @@ namespace QUAN_LY.ViewModel
             set { _errorMessage = value; OnPropertyChanged(); }
         }
 
-        // Thêm biến này để khóa nút khi đang xử lý
         private bool _isLoading;
         public bool IsLoading
         {
@@ -43,41 +89,43 @@ namespace QUAN_LY.ViewModel
 
         public ICommand LoginCommand { get; set; }
 
-        public LoginViewModel()
+       
+        private bool CanLogin(object parameter)
         {
-            _adminService = new AdminServiceSQL();
-            LoginCommand = new RelayCommand(ExecuteLogin, CanExecuteLogin);
+            return !IsLoading && string.IsNullOrEmpty(UserNameError) && !string.IsNullOrEmpty(Username);
         }
 
-        private bool CanExecuteLogin(object obj)
-        {
-            // Chỉ cho bấm khi đã nhập User và không đang Loading
-            return !string.IsNullOrWhiteSpace(Username) && !IsLoading;
-        }
-
-        private async void ExecuteLogin(object obj)
+        private async void ExecuteLogin(object parameter)
         {
             if (IsLoading) return;
+
+            var passwordBox = parameter as PasswordBox;
+            var password = passwordBox?.Password;
+
+            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(password))
+            {
+                ErrorMessage = "Vui lòng nhập đầy đủ thông tin";
+                return;
+            }
+
+           
+            if (!string.IsNullOrEmpty(UserNameError)) return;
 
             try
             {
                 IsLoading = true;
-                ErrorMessage = string.Empty; // Xóa lỗi cũ
+                ErrorMessage = string.Empty;
 
-                // Gọi Service (Lúc này Password đã được gán từ Code Behind)
-                var admin = await _adminService.LoginAsync(Username, Password);
+                var admin = await _adminService.LoginAsync(Username, password);
 
                 if (admin != null)
                 {
-                    // 1. Lưu session
                     App.CurrentUser = admin;
-
-                    // 2. Mở màn hình chính TRƯỚC
-                    MainWindowView mainWindow = new MainWindowView();
+                    var mainWindow = App.Current.Services.GetRequiredService<MainWindowView>();
+                    var mainVM = App.Current.Services.GetRequiredService<PageModel>();
+                    mainWindow.DataContext = mainVM;
                     mainWindow.Show();
 
-                    // 3. Tìm và đóng màn hình Login SAU
-                    // (Dùng cách này an toàn hơn Application.Current.Windows[0])
                     foreach (Window window in Application.Current.Windows)
                     {
                         if (window is LoginWindowView)
@@ -89,7 +137,7 @@ namespace QUAN_LY.ViewModel
                 }
                 else
                 {
-                    ErrorMessage = "Tên đăng nhập hoặc mật khẩu không đúng!";
+                    ErrorMessage = "Sai tên đăng nhập hoặc mật khẩu";
                 }
             }
             catch (Exception ex)

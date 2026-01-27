@@ -3,7 +3,8 @@ using System.Windows.Input;
 using QUAN_LY.Utilities;
 using QUAN_LY.Model;
 using QUAN_LY.View;
-using System.Linq; 
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace QUAN_LY.ViewModel
 {
@@ -143,7 +144,7 @@ namespace QUAN_LY.ViewModel
                     CurrentViewModel = new RevenueStatisticsViewModel();
                     break;
                 case "Admin":
-                    CurrentViewModel = new AdminViewModel();
+                    CurrentViewModel = App.Current.Services.GetRequiredService<AdminViewModel>();
                     break;
             }
         }

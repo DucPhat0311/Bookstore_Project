@@ -15,5 +15,6 @@ namespace QUAN_LY.Interfaces
         Task<List<Admin>> SearchAdminsAsync(string keyword);
         Task<bool> IsUsernameExistsAsync(string username, int? excludeId = null);
         Task<bool> VerifyPasswordAsync(int adminId, string password);
+        Task<Admin> LoginAsync(string username, string password);
     }
 }

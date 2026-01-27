@@ -1,5 +1,4 @@
-﻿
-using QUAN_LY.ViewModel;
+﻿using QUAN_LY.ViewModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -16,44 +15,39 @@ namespace QUAN_LY.Model
         private string _name;
         [Column("name")]
         [Required(ErrorMessage = "Họ tên không được để trống")]
-        [StringLength(100, MinimumLength = 2, ErrorMessage = "Họ tên phải từ 2-100 ký tự")]
         public string Name
         {
             get => _name;
-            set { _name = value.Trim(); OnPropertyChanged(); ValidateProperty(); }
+            set { _name = value; OnPropertyChanged(); }
         }
 
         private string _username;
         [Column("username")]
-        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
-        [StringLength(100, MinimumLength = 3, ErrorMessage = "Tên đăng nhập phải từ 3-100 ký tự")]
-        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Tên đăng nhập chỉ chứa chữ cái, số và dấu gạch dưới")]
+        [Required(ErrorMessage = "Tên đăng nhập bắt buộc")]
         public string Username
         {
             get => _username;
-            set { _username = value.Trim().ToLower(); OnPropertyChanged(); ValidateProperty(); }
+            set { _username = value; OnPropertyChanged(); }
         }
 
         private string _password;
-        [NotMapped] // Không lưu vào DB
-        [Required(ErrorMessage = "Mật khẩu không được để trống")]
-        [MinLength(6, ErrorMessage = "Mật khẩu ít nhất 6 ký tự")]
+        [NotMapped]
         public string Password
         {
             get => _password;
-            set { _password = value; OnPropertyChanged(); ValidateProperty(); }
+            set { _password = value; OnPropertyChanged(); }
         }
 
         [Column("password")]
-        public string PasswordHash { get; set; } // Hash lưu vào DB
+        public string PasswordHash { get; set; }
 
         private string _role;
         [Column("role")]
-        [Required]
+        [Required(ErrorMessage = "Chưa chọn chức vụ")]
         public string Role
         {
             get => _role;
-            set { _role = value; OnPropertyChanged(); ValidateProperty(); }
+            set { _role = value; OnPropertyChanged(); }
         }
 
         private bool _isActive = true;
@@ -64,69 +58,34 @@ namespace QUAN_LY.Model
             set { _isActive = value; OnPropertyChanged(); }
         }
 
-        // Computed properties
-        public string RoleDisplay => Role switch
-        {
-            "Super Admin" => "Quản trị hệ thống",
-            "Manager" => "Quản lý",
-            "Sale Staff" => "Nhân viên bán hàng",
-            _ => Role
-        };
+        
+        public string Error => null;
 
-        public string StatusDisplay => IsActive ? "Đang làm việc" : "Đã nghỉ";
-
-      
-        public void ValidateProperty()
-        {
-            
-            if (AdminId == 0)
-            {
-                Validate("Password");
-            }
-            else
-            {
-             
-                if (_errors.ContainsKey("Password"))
-                    _errors.Remove("Password");
-            }
-
-            
-            Validate("Name");
-            Validate("Username");
-            Validate("Role");
-
-            OnPropertyChanged(nameof(Error));
-            OnPropertyChanged(nameof(HasErrors));
-        }
-
-        private void Validate(string propertyName)
-        {
-            var context = new ValidationContext(this) { MemberName = propertyName };
-            var results = new List<ValidationResult>();
-
-            Validator.TryValidateProperty(
-                GetType().GetProperty(propertyName)?.GetValue(this),
-                context,
-                results
-            );
-
-            _errors[propertyName] = results.FirstOrDefault()?.ErrorMessage;
-        }
-
-        private Dictionary<string, string> _errors = new Dictionary<string, string>();
-
-      
-        public string Error => string.Join("\n", _errors.Values.Where(v => !string.IsNullOrEmpty(v)));
         public string this[string columnName]
         {
             get
             {
-                if (_errors.ContainsKey(columnName))
-                    return _errors[columnName];
+                var context = new ValidationContext(this) { MemberName = columnName };
+                var results = new List<ValidationResult>();
+                if (!Validator.TryValidateProperty(GetType().GetProperty(columnName).GetValue(this), context, results))
+                {
+                    return results[0].ErrorMessage;
+                }
                 return null;
             }
         }
 
-        public bool HasErrors => !string.IsNullOrEmpty(Error);
+      
+        public bool HasErrors
+        {
+            get
+            {
+                
+                var context = new ValidationContext(this);
+                var results = new List<ValidationResult>();
+                bool isValid = Validator.TryValidateObject(this, context, results, true);
+                return !isValid;
+            }
+        }
     }
 }
