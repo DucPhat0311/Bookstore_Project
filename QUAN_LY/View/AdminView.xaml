@@ -13,9 +13,10 @@
 
         <Style x:Key="AdminItemStyle" TargetType="ListViewItem">
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="Margin" Value="0,4"/>
-            <Setter Property="Padding" Value="0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,2"/>
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
@@ -23,18 +24,17 @@
                                 Background="{TemplateBinding Background}" 
                                 BorderBrush="#E0E0E0" 
                                 BorderThickness="0,0,0,1" 
-                                CornerRadius="8"
-                                Padding="10">
-                            <ContentPresenter />
+                                CornerRadius="4"
+                                Padding="8">
+                            <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#F5F7FA"/>
+                                <Setter TargetName="Border" Property="Background" Value="#F5F5F5"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="Border" Property="Background" Value="#E3F2FD"/>
                                 <Setter TargetName="Border" Property="BorderBrush" Value="#2196F3"/>
-                                <Setter TargetName="Border" Property="BorderThickness" Value="1"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -43,131 +43,83 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,20">
+        <Grid Grid.Row="0" Margin="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Quản Lý Nhân Viên" FontSize="24" FontWeight="Bold" Foreground="#333" VerticalAlignment="Center"/>
+            <TextBlock Text="Quản Lý Nhân Sự" FontSize="24" FontWeight="Bold" 
+                       VerticalAlignment="Center" Foreground="#333"/>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <materialDesign:PackIcon Kind="Magnify" Width="25" Height="25" Foreground="Gray" VerticalAlignment="Bottom" Margin="0,0,10,5"/>
-
-                <TextBox Width="300" 
-                         materialDesign:HintAssist.Hint="Tìm kiếm theo tên hoặc tài khoản..."
-                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         VerticalAlignment="Center"/>
-            </StackPanel>
+            <TextBox Grid.Column="1" 
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Tìm kiếm nhân viên..."
+                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                     materialDesign:TextFieldAssist.HasClearButton="True"/>
         </Grid>
 
-        <Border Grid.Row="1" Background="White" BorderBrush="#eee" BorderThickness="1" CornerRadius="10" Padding="10">
-            <Grid>
-                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" 
-                             Value="0" IsIndeterminate="True" 
-                             HorizontalAlignment="Center" VerticalAlignment="Center"
-                             Visibility="{Binding IsLoading, Converter={StaticResource StandardBoolToVisConverter}}"/>
+        <ListView Grid.Row="1" ItemsSource="{Binding AdminList}" 
+                  SelectedItem="{Binding SelectedAdmin}"
+                  ItemContainerStyle="{StaticResource AdminItemStyle}"
+                  Margin="20,0,20,0" 
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="ID" Width="50" DisplayMemberBinding="{Binding AdminId}"/>
 
-                <ListView ItemsSource="{Binding AdminList}" 
-                          SelectedItem="{Binding SelectedAdmin}"
-                          ItemContainerStyle="{StaticResource AdminItemStyle}"
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <GridViewColumn Header="Họ Tên" Width="200" DisplayMemberBinding="{Binding Name}"/>
 
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="60"/>
-                                    <ColumnDefinition Width="250"/>
-                                    <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                    <GridViewColumn Header="Tên Đăng Nhập" Width="180" DisplayMemberBinding="{Binding Username}"/>
 
-                                <materialDesign:PackIcon Kind="AccountCircle" 
-                                                         Width="40" Height="40" 
-                                                         Foreground="#623ed0" 
-                                                         VerticalAlignment="Center"/>
+                    <GridViewColumn Header="Chức Vụ" Width="150" DisplayMemberBinding="{Binding Role}"/>
 
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0">
-                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="ID: " FontSize="12" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding AdminId}" FontSize="12" Foreground="Gray"/>
-                                    </StackPanel>
-                                </StackPanel>
+                    <GridViewColumn Header="Hoạt Động" Width="150">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid Width="100">
+                                    <CheckBox IsChecked="{Binding IsActive}" 
+                                              IsEnabled="False" 
+                                              HorizontalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
 
-                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <TextBlock Text="Tài khoản" FontSize="10" Foreground="Gray"/>
-                                    <TextBlock Text="{Binding Username}" FontWeight="SemiBold"/>
-                                </StackPanel>
-
-                                <Border Grid.Column="3" CornerRadius="10" Background="#E0F7FA" 
-                                        HorizontalAlignment="Left" Padding="10,4" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Role}" Foreground="#006064" FontWeight="Bold"/>
-                                </Border>
-
-                                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="CircleMedium" Width="15" Height="15" Margin="0,2,5,0">
-                                        <materialDesign:PackIcon.Style>
-                                            <Style TargetType="materialDesign:PackIcon">
-                                                <Setter Property="Foreground" Value="Green"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsActive}" Value="False">
-                                                        <Setter Property="Foreground" Value="Red"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </materialDesign:PackIcon.Style>
-                                    </materialDesign:PackIcon>
-
-                                    <TextBlock VerticalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="Đang hoạt động"/>
-                                                <Setter Property="Foreground" Value="Green"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsActive}" Value="False">
-                                                        <Setter Property="Text" Value="Ngừng hoạt động"/>
-                                                        <Setter Property="Foreground" Value="Red"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </Grid>
-        </Border>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="20">
             <Button Content="Xóa Nhân Viên" 
                     Command="{Binding DeleteCommand}"
-                    Background="#FF5252" BorderThickness="0" Margin="0,0,10,0"/>
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Foreground="Red" BorderBrush="Red"
+                    Margin="0,0,10,0"/>
 
-            <Button Content="Thêm Mới (+)" 
+            <Button Content="Thêm Mới" 
                     Command="{Binding OpenAddCommand}"
-                    Background="#623ed0" BorderThickness="0"/>
+                    Style="{StaticResource MaterialDesignRaisedButton}"/>
         </StackPanel>
 
         <Grid Grid.Row="0" Grid.RowSpan="3" 
               Panel.ZIndex="999"
-              Background="#CC000000" 
+              Background="#99000000" 
               Visibility="{Binding IsAdding, Converter={StaticResource StandardBoolToVisConverter}}">
 
-            <Border Background="White" Width="400" VerticalAlignment="Center" CornerRadius="15" Padding="20"
+            <Border Background="White" Width="400" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    CornerRadius="10" Padding="25"
                     MouseDown="Border_MouseDown">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.3"/>
+                </Border.Effect>
+
                 <StackPanel>
                     <TextBlock Text="Thêm Nhân Viên Mới" FontSize="20" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center"/>
 
@@ -184,15 +136,13 @@
                                  Style="{StaticResource MaterialDesignFloatingHintPasswordBox}" Margin="0,0,0,15"
                                  PasswordChanged="PasswordBox_PasswordChanged"/>
 
-                    <ComboBox SelectedValue="{Binding NewAdmin.Role}"
-                              SelectedValuePath="Content"
+                    <ComboBox ItemsSource="{Binding AvailableRoles}"
+                              SelectedValue="{Binding NewAdmin.Role}"
                               materialDesign:HintAssist.Hint="Chức vụ"
-                              Style="{StaticResource MaterialDesignFloatingHintComboBox}" Margin="0,0,0,20">
-                        <ComboBoxItem Content="Sale Staff"/>
-                        <ComboBoxItem Content="Manager"/>
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}" Margin="0,0,0,25">
                     </ComboBox>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Hủy" Command="{Binding CancelAddCommand}" 
                                 Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,10,0"/>
 
@@ -201,5 +151,14 @@
                 </StackPanel>
             </Border>
         </Grid>
+
+        <Grid Grid.Row="0" Grid.RowSpan="3" Panel.ZIndex="1000"
+              Visibility="{Binding IsLoading, Converter={StaticResource StandardBoolToVisConverter}}"
+              Background="#22FFFFFF">
+            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                         IsIndeterminate="True" Width="50" Height="50"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+
     </Grid>
 </UserControl>
